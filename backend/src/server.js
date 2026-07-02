@@ -106,9 +106,14 @@ const PORT = process.env.PORT || 5001;
 
 const __dirname = path.resolve();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: "http://localhost:5173", // change to your deployed frontend URL later
+    origin: allowedOrigins,
     credentials: true,
   })
 );

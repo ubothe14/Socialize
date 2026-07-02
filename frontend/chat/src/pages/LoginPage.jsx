@@ -91,31 +91,31 @@ const LoginPage = () => {
                       <><span className="loading loading-spinner loading-xs" />Signing in...</>
                     ) : "Sign In"}
                   </button>
-
-                  {/* Divider */}
-                  <div className="divider text-xs opacity-50">OR</div>
-
-                  {/* Google Sign-In */}
-                  <div className="flex justify-center">
-                    <GoogleLogin
-                      onSuccess={handleGoogleSuccess}
-                      onError={() => toast.error("Google sign-in failed")}
-                      shape="rectangular"
-                      size="large"
-                      width="100%"
-                      text="signin_with"
-                    />
-                  </div>
-
-                  <div className="text-center mt-2">
-                    <p className="text-sm">
-                      Don't have an account?{" "}
-                      <Link to="/signup" className="text-primary hover:underline">Create one</Link>
-                    </p>
-                  </div>
                 </div>
               </div>
             </form>
+
+            {/* Divider */}
+            <div className="divider text-xs opacity-50 mt-4">OR</div>
+
+            {/* Google Sign-In */}
+            <div className="flex justify-center mb-4">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => toast.error("Google sign-in failed")}
+                shape="rectangular"
+                size="large"
+                width="100%"
+                text="signin_with"
+              />
+            </div>
+
+            <div className="text-center mt-2">
+              <p className="text-sm">
+                Don't have an account?{" "}
+                <Link to="/signup" className="text-primary hover:underline">Create one</Link>
+              </p>
+            </div>
           </div>
         </div>
 

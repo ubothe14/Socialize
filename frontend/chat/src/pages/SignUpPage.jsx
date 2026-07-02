@@ -117,30 +117,30 @@ const SignUpPage = () => {
                     <><span className="loading loading-spinner loading-xs" />Creating account...</>
                   ) : "Create Account"}
                 </button>
-
-                {/* Divider */}
-                <div className="divider text-xs opacity-50">OR</div>
-
-                {/* Google Sign-Up */}
-                <div className="flex justify-center">
-                  <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={() => toast.error("Google sign-in failed")}
-                    shape="rectangular"
-                    size="large"
-                    width="100%"
-                    text="signup_with"
-                  />
-                </div>
-
-                <div className="text-center mt-2">
-                  <p className="text-sm">
-                    Already have an account?{" "}
-                    <Link to="/login" className="text-primary hover:underline">Sign in</Link>
-                  </p>
-                </div>
               </div>
             </form>
+
+            {/* Divider */}
+            <div className="divider text-xs opacity-50 mt-4">OR</div>
+
+            {/* Google Sign-Up */}
+            <div className="flex justify-center mb-4">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => toast.error("Google sign-in failed")}
+                shape="rectangular"
+                size="large"
+                width="100%"
+                text="signup_with"
+              />
+            </div>
+
+            <div className="text-center mt-2">
+              <p className="text-sm">
+                Already have an account?{" "}
+                <Link to="/login" className="text-primary hover:underline">Sign in</Link>
+              </p>
+            </div>
           </div>
         </div>
 
