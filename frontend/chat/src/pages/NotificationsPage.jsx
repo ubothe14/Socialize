@@ -33,6 +33,7 @@ const NotificationsPage = () => {
           </div>
         ) : (
           <>
+            {/* Incoming friend requests */}
             {incomingRequests.length > 0 && (
               <section className="space-y-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -50,19 +51,15 @@ const NotificationsPage = () => {
                       <div className="card-body p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="avatar w-14 h-14 rounded-full bg-base-300">
-                              <img src={request.sender.profilePic} alt={request.sender.fullName} />
+                            <div className="avatar w-14 h-14 rounded-full bg-base-300 overflow-hidden">
+                              <img src={request.sender.profilePic} alt={request.sender.fullName} className="w-full h-full object-cover" />
                             </div>
                             <div>
                               <h3 className="font-semibold">{request.sender.fullName}</h3>
-                              <div className="flex flex-wrap gap-1.5 mt-1">
-                                <span className="badge badge-secondary badge-sm">
-                                  Native: {request.sender.nativeLanguage}
-                                </span>
-                                <span className="badge badge-outline badge-sm">
-                                  Learning: {request.sender.learningLanguage}
-                                </span>
-                              </div>
+                              {request.sender.bio && (
+                                <p className="text-sm opacity-60 truncate max-w-xs">{request.sender.bio}</p>
+                              )}
+                              <p className="text-xs opacity-50 mt-0.5">Wants to connect with you</p>
                             </div>
                           </div>
 
@@ -81,7 +78,7 @@ const NotificationsPage = () => {
               </section>
             )}
 
-            {/* ACCEPTED REQS NOTIFICATONS */}
+            {/* Accepted requests */}
             {acceptedRequests.length > 0 && (
               <section className="space-y-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -94,10 +91,11 @@ const NotificationsPage = () => {
                     <div key={notification._id} className="card bg-base-200 shadow-sm">
                       <div className="card-body p-4">
                         <div className="flex items-start gap-3">
-                          <div className="avatar mt-1 size-10 rounded-full">
+                          <div className="avatar mt-1 size-10 rounded-full overflow-hidden">
                             <img
                               src={notification.recipient.profilePic}
                               alt={notification.recipient.fullName}
+                              className="w-full h-full object-cover"
                             />
                           </div>
                           <div className="flex-1">
@@ -131,4 +129,5 @@ const NotificationsPage = () => {
     </div>
   );
 };
+
 export default NotificationsPage;

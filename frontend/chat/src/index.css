@@ -32,3 +32,151 @@
 .str-chat__message-input {
   border-top: 1px solid #ddd;
 }
+
+/* =============================================
+   CUSTOM CHANNEL HEADER — WhatsApp-style
+   ============================================= */
+.custom-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  min-height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Avatar wrapper with online dot */
+.custom-chat-header__avatar {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+}
+
+.custom-chat-header__avatar img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.custom-chat-header__avatar-fallback {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #6366f1;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* Green online dot on avatar */
+.custom-chat-header__online-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #ffffff;
+}
+
+/* Name + status column */
+.custom-chat-header__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.custom-chat-header__name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Static "online" status text */
+.custom-chat-header__status {
+  font-size: 12px;
+  color: #22c55e;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* Typing indicator line (shown in place of "online") */
+.custom-chat-header__typing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #6366f1;
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.2;
+}
+
+/* Three bouncing dots */
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.typing-dots span {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #6366f1;
+  animation: typingBounce 1.2s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(1) { animation-delay: 0s; }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%            { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Action buttons (video call, search) */
+.custom-chat-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.custom-chat-header__action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.custom-chat-header__action-btn:hover {
+  background: #f3f4f6;
+  color: #6366f1;
+}

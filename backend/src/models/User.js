@@ -14,8 +14,8 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
       minlength: 6,
+      // Not required — Google OAuth users won't have a password
     },
     bio: {
       type: String,
@@ -25,15 +25,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    nativeLanguage: {
-      type: String,
-      default: "",
-    },
-    learningLanguage: {
-      type: String,
-      default: "",
-    },
-    location: {
+    googleId: {
       type: String,
       default: "",
     },
@@ -52,7 +44,8 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  // Only hash if password exists and was modified
+  if (!this.password || !this.isModified("password")) return next();
 
   try {
     const salt = await bcrypt.genSalt(10);
@@ -64,6 +57,7 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
+  if (!this.password) return false;
   const isPasswordCorrect = await bcrypt.compare(enteredPassword, this.password);
   return isPasswordCorrect;
 };

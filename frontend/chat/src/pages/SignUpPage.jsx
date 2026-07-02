@@ -1,55 +1,53 @@
 import { useState } from "react";
-import { ShipWheelIcon } from "lucide-react";
 import { Link } from "react-router";
-
 import useSignUp from "../hooks/useSignUp";
+import { useQueryClient } from "@tanstack/react-query";
+import { axiosInstance } from "../lib/axios";
+import toast from "react-hot-toast";
+import { GoogleLogin } from "@react-oauth/google";
+import { MessageCircleIcon } from "lucide-react";
 
 const SignUpPage = () => {
-  const [signupData, setSignupData] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-  });
-
-  // This is how we did it at first, without using our custom hook
-  // const queryClient = useQueryClient();
-  // const {
-  //   mutate: signupMutation,
-  //   isPending,
-  //   error,
-  // } = useMutation({
-  //   mutationFn: signup,
-  //   onSuccess: () => queryClient.invalidateQueries({ queryKey: ["authUser"] }),
-  // });
-
-  // This is how we did it using our custom hook - optimized version
+  const [signupData, setSignupData] = useState({ fullName: "", email: "", password: "" });
   const { isPending, error, signupMutation } = useSignUp();
+  const queryClient = useQueryClient();
 
   const handleSignup = (e) => {
     e.preventDefault();
     signupMutation(signupData);
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const res = await axiosInstance.post("/auth/google", {
+        credential: credentialResponse.credential,
+      });
+      if (res.data.success) {
+        toast.success(`Welcome to Socialize, ${res.data.user.fullName}!`);
+        queryClient.invalidateQueries({ queryKey: ["authUser"] });
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Google sign-in failed");
+    }
+  };
+
   return (
-    <div
-      className="h-screen flex items-center justify-center p-4 sm:p-6 md:p-8"
-      data-theme="forest"
-    >
+    <div className="h-screen flex items-center justify-center p-4 sm:p-6 md:p-8" data-theme="forest">
       <div className="border border-primary/25 flex flex-col lg:flex-row w-full max-w-5xl mx-auto bg-base-100 rounded-xl shadow-lg overflow-hidden">
-        {/* SIGNUP FORM - LEFT SIDE */}
+
+        {/* SIGNUP FORM */}
         <div className="w-full lg:w-1/2 p-4 sm:p-8 flex flex-col">
-          {/* LOGO */}
+          {/* Logo */}
           <div className="mb-4 flex items-center justify-start gap-2">
-            <ShipWheelIcon className="size-9 text-primary" />
+            <MessageCircleIcon className="size-9 text-primary" />
             <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
-              Streamify
+              Socialize
             </span>
           </div>
 
-          {/* ERROR MESSAGE IF ANY */}
           {error && (
             <div className="alert alert-error mb-4">
-              <span>{error.response.data.message}</span>
+              <span>{error.response?.data?.message || "Something went wrong"}</span>
             </div>
           )}
 
@@ -58,17 +56,13 @@ const SignUpPage = () => {
               <div className="space-y-4">
                 <div>
                   <h2 className="text-xl font-semibold">Create an Account</h2>
-                  <p className="text-sm opacity-70">
-                    Join Streamify and start your language learning adventure!
-                  </p>
+                  <p className="text-sm opacity-70">Join Socialize and start connecting!</p>
                 </div>
 
                 <div className="space-y-3">
-                  {/* FULLNAME */}
+                  {/* Full Name */}
                   <div className="form-control w-full">
-                    <label className="label">
-                      <span className="label-text">Full Name</span>
-                    </label>
+                    <label className="label"><span className="label-text">Full Name</span></label>
                     <input
                       type="text"
                       placeholder="John Doe"
@@ -78,11 +72,10 @@ const SignUpPage = () => {
                       required
                     />
                   </div>
-                  {/* EMAIL */}
+
+                  {/* Email */}
                   <div className="form-control w-full">
-                    <label className="label">
-                      <span className="label-text">Email</span>
-                    </label>
+                    <label className="label"><span className="label-text">Email</span></label>
                     <input
                       type="email"
                       placeholder="john@gmail.com"
@@ -92,22 +85,19 @@ const SignUpPage = () => {
                       required
                     />
                   </div>
-                  {/* PASSWORD */}
+
+                  {/* Password */}
                   <div className="form-control w-full">
-                    <label className="label">
-                      <span className="label-text">Password</span>
-                    </label>
+                    <label className="label"><span className="label-text">Password</span></label>
                     <input
                       type="password"
-                      placeholder="********"
+                      placeholder="Min. 6 characters"
                       className="input input-bordered w-full"
                       value={signupData.password}
                       onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                       required
                     />
-                    <p className="text-xs opacity-70 mt-1">
-                      Password must be at least 6 characters long
-                    </p>
+                    <p className="text-xs opacity-70 mt-1">Password must be at least 6 characters</p>
                   </div>
 
                   <div className="form-control">
@@ -122,23 +112,31 @@ const SignUpPage = () => {
                   </div>
                 </div>
 
-                <button className="btn btn-primary w-full" type="submit">
+                <button className="btn btn-primary w-full" type="submit" disabled={isPending}>
                   {isPending ? (
-                    <>
-                      <span className="loading loading-spinner loading-xs"></span>
-                      Loading...
-                    </>
-                  ) : (
-                    "Create Account"
-                  )}
+                    <><span className="loading loading-spinner loading-xs" />Creating account...</>
+                  ) : "Create Account"}
                 </button>
 
-                <div className="text-center mt-4">
+                {/* Divider */}
+                <div className="divider text-xs opacity-50">OR</div>
+
+                {/* Google Sign-Up */}
+                <div className="flex justify-center">
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => toast.error("Google sign-in failed")}
+                    shape="rectangular"
+                    size="large"
+                    width="100%"
+                    text="signup_with"
+                  />
+                </div>
+
+                <div className="text-center mt-2">
                   <p className="text-sm">
                     Already have an account?{" "}
-                    <Link to="/login" className="text-primary hover:underline">
-                      Sign in
-                    </Link>
+                    <Link to="/login" className="text-primary hover:underline">Sign in</Link>
                   </p>
                 </div>
               </div>
@@ -146,22 +144,19 @@ const SignUpPage = () => {
           </div>
         </div>
 
-        {/* SIGNUP FORM - RIGHT SIDE */}
+        {/* RIGHT SIDE ILLUSTRATION */}
         <div className="hidden lg:flex w-full lg:w-1/2 bg-primary/10 items-center justify-center">
-          <div className="max-w-md p-8">
-            {/* Illustration */}
+          <div className="max-w-md p-8 text-center space-y-6">
             <div className="relative aspect-square max-w-sm mx-auto">
-              <img src="/i.png" alt="Language connection illustration" className="w-full h-full" />
+              <img src="/i.png" alt="Connect with friends" className="w-full h-full" />
             </div>
-
-            <div className="text-center space-y-3 mt-6">
-              <h2 className="text-xl font-semibold">Connect with language partners worldwide</h2>
-              <p className="opacity-70">
-                Practice conversations, make friends, and improve your language skills together
-              </p>
+            <div className="space-y-3">
+              <h2 className="text-xl font-semibold">Connect with friends worldwide</h2>
+              <p className="opacity-70">Send messages, share moments, and stay connected</p>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
