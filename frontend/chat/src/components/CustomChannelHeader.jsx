@@ -6,7 +6,7 @@ import { VideoIcon, SearchIcon } from "lucide-react";
  * Renders the chat header with avatar, name, and an inline typing indicator
  * displayed below the name — just like WhatsApp.
  */
-const CustomChannelHeader = ({ handleVideoCall }) => {
+const CustomChannelHeader = ({ handleVideoCall, onSearchClick }) => {
   const { channel } = useChannelStateContext();
   const { typing } = useTypingContext();
   const { client } = useChatContext();
@@ -69,6 +69,7 @@ const CustomChannelHeader = ({ handleVideoCall }) => {
           </button>
         )}
         <button
+          onClick={onSearchClick}
           className="custom-chat-header__action-btn"
           title="Search"
         >

@@ -97,6 +97,7 @@ import path from "path";
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import chatRoutes from "./routes/chat.route.js";
+import statusRoutes from "./routes/status.route.js";
 
 import { connectDB } from "./lib/db.js";
 
@@ -119,6 +120,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/status", statusRoutes);
 
 // ✅ Always serve frontend build
 app.use(express.static(path.join(__dirname, "../frontend/chat/dist")));

@@ -59,7 +59,27 @@ export async function acceptFriendRequest(requestId) {
   return response.data;
 }
 
+export async function rejectFriendRequest(requestId) {
+  const response = await axiosInstance.delete(`/users/friend-request/${requestId}/reject`);
+  return response.data;
+}
+
 export async function getStreamToken() {
   const response = await axiosInstance.get("/chat/token");
   return response.data;
 }
+
+export async function createStatus(statusData) {
+  const response = await axiosInstance.post("/status", statusData);
+  return response.data;
+}
+
+export async function getStatuses() {
+  const response = await axiosInstance.get("/status");
+  return response.data;
+}
+
+export async function viewStatus(statusId) {
+  const response = await axiosInstance.put(`/status/${statusId}/view`);
+  return response.data;
+}
