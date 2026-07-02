@@ -19,6 +19,7 @@ import CustomChannelHeader from "./CustomChannelHeader";
 import ChatLoader from "./ChatLoader";
 import StatusPlayer from "./StatusPlayer";
 import MessageSearchPanel from "./MessageSearchPanel";
+import IncomingCallPopup from "./IncomingCallPopup";
 import { MessageSquareIcon, ArrowLeftIcon } from "lucide-react";
 
 const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
@@ -32,6 +33,7 @@ const WhatsAppLayout = () => {
   const [chatLoading, setChatLoading]     = useState(false);
   const [activeStatusGroup, setActiveStatusGroup] = useState(null);
   const [showSearchPanel, setShowSearchPanel] = useState(false);
+  const [incomingCall, setIncomingCall] = useState(null);
 
   // Get stream token
   const { data: tokenData } = useQuery({
@@ -48,7 +50,7 @@ const WhatsAppLayout = () => {
   });
   const notifCount = friendRequests?.incomingReqs?.length || 0;
 
-  // Init Stream Chat client once
+  // Init Stream Chat client once and query all user channels to start watching them
   useEffect(() => {
     const initClient = async () => {
       if (!tokenData?.token || !authUser || chatClient) return;
@@ -59,12 +61,43 @@ const WhatsAppLayout = () => {
           tokenData.token
         );
         setChatClient(client);
+
+        // Watch all of the user's messaging channels globally to receive incoming call events
+        await client.queryChannels({
+          type: "messaging",
+          members: { $in: [authUser._id] },
+        }, {}, { watch: true });
+
       } catch (err) {
         console.error("Stream init error:", err);
       }
     };
     initClient();
   }, [tokenData, authUser]);
+
+  // Set up event listeners for incoming calls globally
+  useEffect(() => {
+    if (!chatClient || !authUser) return;
+
+    const listener = chatClient.on((event) => {
+      if (
+        (event.type === "message.new" || event.type === "notification.message_new") &&
+        event.message?.customType === "call_invite" &&
+        event.message?.user?.id !== authUser._id
+      ) {
+        setIncomingCall({
+          callId: event.message.callId,
+          callerName: event.message.callerName,
+          callerPic: event.message.callerPic,
+          channelId: event.channel_id,
+        });
+      }
+    });
+
+    return () => {
+      listener.unsubscribe();
+    };
+  }, [chatClient, authUser]);
 
   // Open channel when a friend is selected
   useEffect(() => {
@@ -74,11 +107,9 @@ const WhatsAppLayout = () => {
       setShowSearchPanel(false); // close search panel on contact change
       try {
         if (selectedFriend.cid) {
-          // It's already a group channel object
           await selectedFriend.watch();
           setChannel(selectedFriend);
         } else {
-          // It's a standard 1-to-1 user
           const channelId = [authUser._id, selectedFriend._id].sort().join("-");
           const ch = chatClient.channel("messaging", channelId, {
             members: [authUser._id, selectedFriend._id],
@@ -96,11 +127,25 @@ const WhatsAppLayout = () => {
     openChannel();
   }, [selectedFriend, chatClient]);
 
-  const handleVideoCall = () => {
+  // Initiate real-time calling flow
+  const handleVideoCall = async () => {
     if (channel) {
-      const callUrl = `${window.location.origin}/call/${channel.id}`;
-      channel.sendMessage({ text: `I've started a video call. Join me here: ${callUrl}` });
-      toast.success("Video call link sent!");
+      try {
+        // Send call invite message instead of custom event to bypass Stream Chat policy constraints
+        await channel.sendMessage({
+          text: "Incoming video call...",
+          customType: "call_invite",
+          callId: channel.id,
+          callerName: authUser.fullName,
+          callerPic: authUser.profilePic,
+        });
+
+        // Navigate User A (caller) directly to call page with calling=true
+        window.location.href = `/call/${channel.id}?calling=true`;
+      } catch (err) {
+        console.error("Error starting call:", err);
+        toast.error("Failed to start call");
+      }
     }
   };
 
@@ -130,12 +175,11 @@ const WhatsAppLayout = () => {
   };
 
   const handleSelectMessage = (messageId) => {
-    // Attempt multiple selectors to guarantee finding the DOM element
     const element =
       document.querySelector(`[data-message-id="${messageId}"]`) ||
       document.getElementById(`message-${messageId}`) ||
       document.querySelector(`.str-chat__message[data-testid*="${messageId}"]`) ||
-      document.querySelector(`[data-testid="message-wrapper"]`); // fallback
+      document.querySelector(`[data-testid="message-wrapper"]`);
 
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -150,6 +194,32 @@ const WhatsAppLayout = () => {
 
   return (
     <div className="wa-app">
+      {/* Incoming Call Popup overlay */}
+      {incomingCall && (
+        <IncomingCallPopup
+          callerName={incomingCall.callerName}
+          callerPic={incomingCall.callerPic}
+          onAccept={() => {
+            window.location.href = `/call/${incomingCall.callId}`;
+          }}
+          onDecline={async () => {
+            try {
+              // Send reject message instead of custom event to bypass Stream Chat policy constraints
+              const ch = chatClient.channel("messaging", incomingCall.callId);
+              await ch.sendMessage({
+                text: "Call declined",
+                customType: "call_reject",
+                callId: incomingCall.callId,
+              });
+            } catch (err) {
+              console.error("Error declining call:", err);
+            } finally {
+              setIncomingCall(null);
+            }
+          }}
+        />
+      )}
+
       {/* 1. Narrow Icon Sidebar */}
       <IconSidebar
         activeTab={activeTab}
@@ -186,7 +256,9 @@ const WhatsAppLayout = () => {
                 <div style={{
                   width: 200, height: 200, borderRadius: "50%",
                   background: "rgba(0,168,132,0.08)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   marginBottom: 16,
                 }}>
                   <svg viewBox="0 0 24 24" width="80" height="80" fill="var(--wa-green)" opacity="0.6">
@@ -205,9 +277,9 @@ const WhatsAppLayout = () => {
             ) : channel ? (
               <Chat client={chatClient}>
                 <Channel channel={channel}>
-                  <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%" }}>
-                    {/* Mobile back button & Custom Header */}
-                    <div className="wa-panel-header" style={{ display: "flex", alignItems: "center" }}>
+                  <Window hideOnThread>
+                    {/* Render custom header navbar INSIDE the Window component so it flows naturally before MessageList */}
+                    <div style={{ display: "flex", alignItems: "center", width: "100%", background: "var(--wa-panel-header)", borderBottom: "1px solid var(--wa-divider)" }}>
                       <button
                         onClick={handleBackFromChat}
                         style={{ background: "none", border: "none", cursor: "pointer", color: "var(--wa-text-muted)", marginRight: 8, padding: "4px", borderRadius: "50%", display: "flex" }}
@@ -223,12 +295,10 @@ const WhatsAppLayout = () => {
                       </div>
                     </div>
 
-                    <Window hideOnThread>
-                      <MessageList />
-                      <MessageInput focus />
-                    </Window>
-                    <Thread />
-                  </div>
+                    <MessageList />
+                    <MessageInput focus />
+                  </Window>
+                  <Thread />
                 </Channel>
               </Chat>
             ) : null
@@ -238,7 +308,9 @@ const WhatsAppLayout = () => {
               <div style={{
                 width: 200, height: 200, borderRadius: "50%",
                 background: "rgba(0,168,132,0.08)",
-                display: "flex", alignItems: "center", justifyContent: "center",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 marginBottom: 16,
               }}>
                 <MessageSquareIcon size={80} color="var(--wa-green)" opacity={0.6} />
