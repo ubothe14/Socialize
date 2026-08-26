@@ -19,7 +19,7 @@ const TAB_TITLES = {
   settings:      "Settings",
 };
 
-const LeftPanel = ({ activeTab, setActiveTab, selectedFriend, setSelectedFriend, onSelectStatusGroup, chatClient }) => {
+const LeftPanel = ({ activeTab, selectedFriend, setSelectedFriend, onSelectStatusGroup, chatClient }) => {
   const [search, setSearch] = useState("");
   const [showNewChat, setShowNewChat] = useState(false);
 

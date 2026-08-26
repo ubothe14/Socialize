@@ -16,19 +16,22 @@ const IconSidebar = ({ activeTab, setActiveTab, notifCount }) => {
     <div className="wa-icon-sidebar">
       {/* Navigation icons */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4, marginTop: 8 }}>
-        {tabs.map(({ id, icon: Icon, label }) => (
-          <button
-            key={id}
-            title={label}
-            className={`wa-icon-btn ${activeTab === id ? "active" : ""}`}
-            onClick={() => setActiveTab(id)}
-          >
-            <Icon size={22} />
-            {id === "notifications" && notifCount > 0 && (
-              <span className="badge-count">{notifCount > 9 ? "9+" : notifCount}</span>
-            )}
-          </button>
-        ))}
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              title={tab.label}
+              className={`wa-icon-btn ${activeTab === tab.id ? "active" : ""}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <Icon size={22} />
+              {tab.id === "notifications" && notifCount > 0 && (
+                <span className="badge-count">{notifCount > 9 ? "9+" : notifCount}</span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Profile avatar at bottom → opens settings */}

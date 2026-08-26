@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuthUser from "../../hooks/useAuthUser";
-import { getStatuses, createStatus, viewStatus } from "../../lib/api";
+import { getStatuses, createStatus } from "../../lib/api";
 import { PlusIcon, MoreVerticalIcon, SmileIcon, ImageIcon, SendIcon, XIcon } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -34,14 +34,6 @@ const StatusTab = ({ onSelectStatusGroup }) => {
     },
     onError: () => {
       toast.error("Failed to update status");
-    },
-  });
-
-  // View status mutation
-  const { mutate: markAsViewed } = useMutation({
-    mutationFn: viewStatus,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["statuses"] });
     },
   });
 

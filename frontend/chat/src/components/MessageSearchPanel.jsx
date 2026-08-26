@@ -76,7 +76,7 @@ const MessageSearchPanel = ({ channel, onClose, onSelectMessage }) => {
           </>
         ) : (
           <div style={{ padding: "48px 24px", textAlign: "center", color: "var(--wa-text-muted)", fontSize: 13, lineHeight: 1.6 }}>
-            Search for messages with Jagjit in this chat.
+            Search for messages in this chat.
           </div>
         )}
       </div>

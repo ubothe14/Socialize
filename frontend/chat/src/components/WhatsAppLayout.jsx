@@ -73,7 +73,7 @@ const WhatsAppLayout = () => {
       }
     };
     initClient();
-  }, [tokenData, authUser]);
+  }, [tokenData, authUser, chatClient]);
 
   // Set up event listeners for incoming calls globally
   useEffect(() => {
@@ -102,7 +102,7 @@ const WhatsAppLayout = () => {
   // Open channel when a friend is selected
   useEffect(() => {
     const openChannel = async () => {
-      if (!chatClient || !selectedFriend) return;
+      if (!chatClient || !selectedFriend || !authUser) return;
       setChatLoading(true);
       setShowSearchPanel(false); // close search panel on contact change
       try {
@@ -110,9 +110,10 @@ const WhatsAppLayout = () => {
           await selectedFriend.watch();
           setChannel(selectedFriend);
         } else {
-          const channelId = [authUser._id, selectedFriend._id].sort().join("-");
+          const memberIds = Array.from(new Set([authUser._id, selectedFriend._id]));
+          const channelId = memberIds.length === 1 ? `self-${authUser._id}` : [...memberIds].sort().join("-");
           const ch = chatClient.channel("messaging", channelId, {
-            members: [authUser._id, selectedFriend._id],
+            members: memberIds,
           });
           await ch.watch();
           setChannel(ch);
@@ -125,7 +126,7 @@ const WhatsAppLayout = () => {
       }
     };
     openChannel();
-  }, [selectedFriend, chatClient]);
+  }, [selectedFriend, chatClient, authUser]);
 
   // Initiate real-time calling flow
   const handleVideoCall = async () => {

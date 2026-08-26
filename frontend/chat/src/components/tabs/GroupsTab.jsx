@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import useAuthUser from "../../hooks/useAuthUser";
 import { getUserFriends } from "../../lib/api";
@@ -20,7 +20,7 @@ const GroupsTab = ({ chatClient, onSelectGroupChannel }) => {
   });
 
   // Fetch existing group channels
-  const fetchGroups = async () => {
+  const fetchGroups = useCallback(async () => {
     if (!chatClient || !authUser) return;
     setLoadingGroups(true);
     try {
@@ -40,11 +40,11 @@ const GroupsTab = ({ chatClient, onSelectGroupChannel }) => {
     } finally {
       setLoadingGroups(false);
     }
-  };
+  }, [chatClient, authUser]);
 
   useEffect(() => {
     fetchGroups();
-  }, [chatClient, authUser]);
+  }, [fetchGroups]);
 
   const handleToggleMember = (userId) => {
     setSelectedMembers((prev) =>

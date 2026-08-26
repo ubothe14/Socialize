@@ -24,6 +24,7 @@ const LoginPage = () => {
       });
       if (res.data.success) {
         toast.success(`Welcome, ${res.data.user.fullName}!`);
+        queryClient.setQueryData(["authUser"], res.data);
         queryClient.invalidateQueries({ queryKey: ["authUser"] });
       }
     } catch (err) {

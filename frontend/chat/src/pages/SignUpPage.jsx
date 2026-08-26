@@ -24,6 +24,7 @@ const SignUpPage = () => {
       });
       if (res.data.success) {
         toast.success(`Welcome to Socialize, ${res.data.user.fullName}!`);
+        queryClient.setQueryData(["authUser"], res.data);
         queryClient.invalidateQueries({ queryKey: ["authUser"] });
       }
     } catch (err) {

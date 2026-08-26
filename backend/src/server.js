@@ -93,6 +93,7 @@ import "dotenv/config";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
+import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
@@ -104,7 +105,9 @@ import { connectDB } from "./lib/db.js";
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-const __dirname = path.resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const distPath = path.resolve(__dirname, "../../frontend/chat/dist");
 
 const allowedOrigins = [
   "http://localhost:5173",
@@ -127,11 +130,11 @@ app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/status", statusRoutes);
 
-// ✅ Always serve frontend build
-app.use(express.static(path.join(__dirname, "../frontend/chat/dist")));
+// ✅ Serve frontend build
+app.use(express.static(distPath));
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/chat/dist/index.html"));
+  res.sendFile(path.join(distPath, "index.html"));
 });
 
 app.listen(PORT, () => {

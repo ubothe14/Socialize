@@ -29,7 +29,6 @@ const CallPage = () => {
   const isCallingMode = searchParams.get("calling") === "true"; // Caller is in calling mode
 
   const [client, setClient] = useState(null);
-  const [chatClient, setChatClient] = useState(null);
   const [call, setCall] = useState(null);
   const [isConnecting, setIsConnecting] = useState(true);
   const [callRejected, setCallRejected] = useState(false);
@@ -58,6 +57,9 @@ const CallPage = () => {
 
   // Connect both Chat Client and Video Client
   useEffect(() => {
+    let listener = null;
+    let channel = null;
+
     const initClients = async () => {
       if (!tokenData?.token || !authUser || !callId) return;
 
@@ -86,13 +88,12 @@ const CallPage = () => {
         if (!cClient.userID) {
           await cClient.connectUser(user, tokenData.token);
         }
-        setChatClient(cClient);
 
         // Watch the chat channel for rejection
-        const channel = cClient.channel("messaging", callId);
+        channel = cClient.channel("messaging", callId);
         await channel.watch();
 
-        channel.on("message.new", (event) => {
+        listener = channel.on("message.new", (event) => {
           if (
             event.message?.customType === "call_reject" &&
             event.message?.user?.id !== authUser._id
@@ -117,9 +118,11 @@ const CallPage = () => {
     initClients();
 
     return () => {
-      // Clean up chat listeners if needed
+      if (listener && listener.unsubscribe) {
+        listener.unsubscribe();
+      }
     };
-  }, [tokenData, authUser, callId]);
+  }, [tokenData, authUser, callId, navigate]);
 
   const handleCancelCall = async () => {
     if (call) {

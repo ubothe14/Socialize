@@ -23,7 +23,8 @@ export async function createStatus(req, res) {
 // Get all status updates (yours and your friends)
 export async function getStatuses(req, res) {
   try {
-    const userIds = [req.user._id, ...req.user.friends];
+    const friends = req.user.friends || [];
+    const userIds = [req.user._id, ...friends];
 
     const statuses = await Status.find({ user: { $in: userIds } })
       .populate("user", "fullName profilePic")

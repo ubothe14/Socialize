@@ -19,28 +19,7 @@ const StatusPlayer = ({ activeStatusGroup, onClose, onViewed }) => {
     if (currentStatus && onViewed) {
       onViewed(currentStatus._id);
     }
-  }, [currentIndex, currentStatus]);
-
-  // Timer for progress bar & auto-advance
-  useEffect(() => {
-    setProgress(0);
-    const duration = 5000; // 5 seconds
-    const intervalTime = 50;
-    const step = (intervalTime / duration) * 100;
-
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(timer);
-          handleNext();
-          return 100;
-        }
-        return prev + step;
-      });
-    }, intervalTime);
-
-    return () => clearInterval(timer);
-  }, [currentIndex]);
+  }, [currentIndex, currentStatus, onViewed]);
 
   const handleNext = () => {
     if (currentIndex < statuses.length - 1) {
@@ -55,6 +34,31 @@ const StatusPlayer = ({ activeStatusGroup, onClose, onViewed }) => {
       setCurrentIndex((prev) => prev - 1);
     }
   };
+
+  // Timer for progress bar & auto-advance
+  useEffect(() => {
+    setProgress(0);
+    const duration = 5000; // 5 seconds
+    const intervalTime = 50;
+    const step = (intervalTime / duration) * 100;
+
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(timer);
+          if (currentIndex < statuses.length - 1) {
+            setCurrentIndex((i) => i + 1);
+          } else {
+            onClose();
+          }
+          return 100;
+        }
+        return prev + step;
+      });
+    }, intervalTime);
+
+    return () => clearInterval(timer);
+  }, [currentIndex, statuses.length, onClose]);
 
   if (!currentStatus) return null;
 

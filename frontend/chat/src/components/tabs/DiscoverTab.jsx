@@ -15,7 +15,7 @@ const DiscoverTab = ({ search, friends }) => {
     queryFn: getOutgoingFriendReqs,
   });
 
-  const { mutate: sendRequest, isPending } = useMutation({
+  const { mutate: sendRequest, isPending: sendingRequest } = useMutation({
     mutationFn: sendFriendRequest,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["outgoingFriendReqs"] }),
   });
@@ -51,7 +51,7 @@ const DiscoverTab = ({ search, friends }) => {
       <div className="wa-section-label">People you may know</div>
       {filtered.map((user) => {
         const isAlreadyFriend = friendIds.has(user._id);
-        const isPending = outgoingIds.has(user._id);
+        const isRequestPending = outgoingIds.has(user._id);
 
         return (
           <div key={user._id} className="wa-user-row">
@@ -70,7 +70,7 @@ const DiscoverTab = ({ search, friends }) => {
                 <CheckCircleIcon size={14} style={{ display: "inline", marginRight: 4 }} />
                 Friends
               </button>
-            ) : isPending ? (
+            ) : isRequestPending ? (
               <button className="wa-btn-ghost" disabled>
                 Pending
               </button>
@@ -78,6 +78,7 @@ const DiscoverTab = ({ search, friends }) => {
               <button
                 className="wa-btn-primary"
                 onClick={() => sendRequest(user._id)}
+                disabled={sendingRequest}
               >
                 <UserPlusIcon size={14} style={{ display: "inline", marginRight: 4 }} />
                 Add

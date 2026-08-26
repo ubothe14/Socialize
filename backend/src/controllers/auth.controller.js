@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { upsertStreamUser } from "../lib/stream.js";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
@@ -114,6 +115,12 @@ export async function googleAuth(req, res) {
 
     const payload = ticket.getPayload();
     const { sub: googleId, email, name, picture } = payload;
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        message: "Database connection unavailable. Please check MONGO_URI in .env.",
+      });
+    }
 
     // Find existing user by Google ID or email
     let user = await User.findOne({ $or: [{ googleId }, { email }] });
