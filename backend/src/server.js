@@ -88,12 +88,65 @@
 
 
 
+// import express from "express";
+// import "dotenv/config";
+// import cookieParser from "cookie-parser";
+// import cors from "cors";
+// import path from "path";
+// import { fileURLToPath } from "url";
+
+// import authRoutes from "./routes/auth.route.js";
+// import userRoutes from "./routes/user.route.js";
+// import chatRoutes from "./routes/chat.route.js";
+// import statusRoutes from "./routes/status.route.js";
+
+// import { connectDB } from "./lib/db.js";
+
+// const app = express();
+// const PORT = process.env.PORT || 5001;
+
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+// const distPath = path.resolve(__dirname, "../../frontend/chat/dist");
+
+// const allowedOrigins = [
+//   "http://localhost:5173",
+//   process.env.FRONTEND_URL
+// ].filter(Boolean);
+
+// app.use(
+//   cors({
+//     origin: allowedOrigins,
+//     credentials: true,
+//   })
+// );
+
+// app.use(express.json());
+// app.use(cookieParser());
+
+// // API Routes
+// app.use("/api/auth", authRoutes);
+// app.use("/api/users", userRoutes);
+// app.use("/api/chat", chatRoutes);
+// app.use("/api/status", statusRoutes);
+
+// // ✅ Serve frontend build
+// app.use(express.static(distPath));
+
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(distPath, "index.html"));
+// });
+
+// app.listen(PORT, () => {
+//   console.log(`✅ Server running on port ${PORT}`);
+//   connectDB();
+// });
+
+
 import express from "express";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
@@ -105,13 +158,10 @@ import { connectDB } from "./lib/db.js";
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const distPath = path.resolve(__dirname, "../../frontend/chat/dist");
-
+// Allowed frontend URLs
 const allowedOrigins = [
   "http://localhost:5173",
-  process.env.FRONTEND_URL
+  process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 app.use(
@@ -130,11 +180,9 @@ app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/status", statusRoutes);
 
-// ✅ Serve frontend build
-app.use(express.static(distPath));
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(distPath, "index.html"));
+// Backend health check
+app.get("/", (req, res) => {
+  res.send("Socialize Backend is Running 🚀");
 });
 
 app.listen(PORT, () => {
