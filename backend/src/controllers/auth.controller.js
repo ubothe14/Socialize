@@ -11,11 +11,12 @@ function issueJwt(res, userId) {
   const token = jwt.sign({ userId }, process.env.JWT_SECRET_KEY, {
     expiresIn: "7d",
   });
+
   res.cookie("jwt", token, {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: "strict",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: "none",
+    secure: true,
   });
 }
 
@@ -95,8 +96,16 @@ export async function login(req, res) {
 
 // ─── Logout ──────────────────────────────────────────────────────────────────
 export function logout(req, res) {
-  res.clearCookie("jwt");
-  res.status(200).json({ success: true, message: "Logout successful" });
+  res.clearCookie("jwt", {
+    httpOnly: true,
+    sameSite: "none",
+    secure: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Logout successful",
+  });
 }
 
 // ─── Google OAuth ─────────────────────────────────────────────────────────────
