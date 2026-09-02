@@ -344,6 +344,10 @@
 // };
 
 // export default WhatsAppLayout;
+
+
+
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { StreamChat } from "stream-chat";
@@ -419,7 +423,6 @@ const WhatsAppLayout = () => {
     enabled: !!authUser,
   });
 
-  // Number of pending incoming friend requests
   const notifCount =
     friendRequests?.incomingReqs?.length || 0;
 
@@ -973,10 +976,6 @@ const WhatsAppLayout = () => {
 
       {/* =====================================================
           LEFT PANEL
-          
-          IMPORTANT:
-          Notification count is passed HERE.
-          It is NOT passed to IconSidebar.
           ===================================================== */}
 
       {activeTab !== "ai" && (
@@ -993,6 +992,7 @@ const WhatsAppLayout = () => {
         >
           <LeftPanel
             activeTab={activeTab}
+            setActiveTab={handleTabChange}
             selectedFriend={
               selectedFriend
             }

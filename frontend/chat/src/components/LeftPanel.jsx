@@ -28,6 +28,7 @@ const TAB_TITLES = {
 
 const LeftPanel = ({
   activeTab,
+  setActiveTab,
   selectedFriend,
   setSelectedFriend,
   onSelectStatusGroup,
@@ -37,7 +38,10 @@ const LeftPanel = ({
   const [search, setSearch] = useState("");
   const [showNewChat, setShowNewChat] = useState(false);
 
-  // Fetch friends list
+  // =========================================================
+  // FETCH FRIENDS
+  // =========================================================
+
   const { data: friends = [] } = useQuery({
     queryKey: ["friends"],
     queryFn: getUserFriends,
@@ -45,58 +49,96 @@ const LeftPanel = ({
 
   const showSearch = ["chats", "discover"].includes(activeTab);
 
-  // New Chat panel
+  // =========================================================
+  // NEW CHAT PANEL
+  // =========================================================
+
   if (showNewChat) {
     return (
       <NewChatPanel
         friends={friends}
         onClose={() => setShowNewChat(false)}
-        onSelectFriend={setSelectedFriend}
+        onSelectFriend={(friend) => {
+          setShowNewChat(false);
+          setSelectedFriend(friend);
+        }}
       />
     );
   }
 
+  // =========================================================
+  // MAIN PANEL
+  // =========================================================
+
   return (
     <div className="wa-left-panel">
-      {/* Header */}
+
+      {/* =====================================================
+          HEADER
+          ===================================================== */}
+
       <div className="wa-panel-header">
+
         <span className="wa-panel-title">
           {TAB_TITLES[activeTab] || "Socialize"}
         </span>
 
-        {/* Header actions */}
+        {/* ===================================================
+            HEADER ACTIONS
+            =================================================== */}
+
         {activeTab === "chats" && (
           <div className="wa-header-actions">
 
-            {/* Notifications */}
+            {/* =================================================
+                NOTIFICATIONS
+                ================================================= */}
+
             <button
+              type="button"
               className="wa-header-btn notification-header-btn"
               title="Notifications"
-              onClick={() => setActiveTab("notifications")}
+              aria-label="Notifications"
+              onClick={() =>
+                setActiveTab("notifications")
+              }
             >
               <BellIcon size={20} />
 
               {notifCount > 0 && (
                 <span className="notification-header-badge">
-                  {notifCount > 99 ? "99+" : notifCount}
+                  {notifCount > 99
+                    ? "99+"
+                    : notifCount}
                 </span>
               )}
             </button>
 
-            {/* New Chat */}
+            {/* =================================================
+                NEW CHAT
+                ================================================= */}
+
             <button
+              type="button"
               className="wa-header-btn"
               title="New Chat"
-              onClick={() => setShowNewChat(true)}
+              aria-label="New Chat"
+              onClick={() =>
+                setShowNewChat(true)
+              }
             >
               <PenSquareIcon size={20} />
             </button>
 
           </div>
         )}
+
       </div>
 
-      {/* Search bar */}
+      {/* =====================================================
+          SEARCH BAR
+          ===================================================== */}
+
       {showSearch && (
         <div
           className="wa-search-wrap"
@@ -104,6 +146,7 @@ const LeftPanel = ({
             position: "relative",
           }}
         >
+
           <SearchIcon
             size={16}
             className="search-icon"
@@ -113,6 +156,7 @@ const LeftPanel = ({
               top: "50%",
               transform: "translateY(-50%)",
               color: "var(--wa-text-muted)",
+              pointerEvents: "none",
             }}
           />
 
@@ -125,15 +169,24 @@ const LeftPanel = ({
             }
             className="wa-search-input"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
           />
+
         </div>
       )}
 
-      {/* Tab content */}
+      {/* =====================================================
+          TAB CONTENT
+          ===================================================== */}
+
       <div className="wa-panel-content">
 
-        {/* Chats */}
+        {/* ===================================================
+            CHATS
+            =================================================== */}
+
         {activeTab === "chats" && (
           <ChatListTab
             friends={friends}
@@ -143,22 +196,35 @@ const LeftPanel = ({
           />
         )}
 
-        {/* Groups */}
+        {/* ===================================================
+            GROUPS
+            =================================================== */}
+
         {activeTab === "groups" && (
           <GroupsTab
             chatClient={chatClient}
-            onSelectGroupChannel={setSelectedFriend}
+            onSelectGroupChannel={
+              setSelectedFriend
+            }
           />
         )}
 
-        {/* Status */}
+        {/* ===================================================
+            STATUS
+            =================================================== */}
+
         {activeTab === "status" && (
           <StatusTab
-            onSelectStatusGroup={onSelectStatusGroup}
+            onSelectStatusGroup={
+              onSelectStatusGroup
+            }
           />
         )}
 
-        {/* Discover */}
+        {/* ===================================================
+            DISCOVER
+            =================================================== */}
+
         {activeTab === "discover" && (
           <DiscoverTab
             search={search}
@@ -166,12 +232,18 @@ const LeftPanel = ({
           />
         )}
 
-        {/* Notifications */}
+        {/* ===================================================
+            NOTIFICATIONS
+            =================================================== */}
+
         {activeTab === "notifications" && (
           <NotificationsTab />
         )}
 
-        {/* Settings */}
+        {/* ===================================================
+            SETTINGS
+            =================================================== */}
+
         {activeTab === "settings" && (
           <SettingsPanel />
         )}
