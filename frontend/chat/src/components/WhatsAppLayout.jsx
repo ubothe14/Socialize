@@ -20,7 +20,7 @@
 // import StatusPlayer from "./StatusPlayer";
 // import MessageSearchPanel from "./MessageSearchPanel";
 // import IncomingCallPopup from "./IncomingCallPopup";
-import AIChatPage from "../pages/AIChatPage.jsx";
+
 // import { MessageSquareIcon, ArrowLeftIcon } from "lucide-react";
 
 // const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
