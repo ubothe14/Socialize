@@ -254,7 +254,6 @@
 // export default CallPage;
 
 
-
 import { useEffect, useState } from "react";
 import {
   useNavigate,
@@ -298,7 +297,7 @@ const CallPage = () => {
   const isCallingMode =
     searchParams.get("calling") === "true";
 
-  // Chat channel ID sent from WhatsAppLayout
+  // Chat channel ID
   const chatChannelId =
     searchParams.get("channelId");
 
@@ -470,7 +469,7 @@ const CallPage = () => {
         );
 
         // =====================================================
-        // JOIN FIRST
+        // JOIN VIDEO CALL
         // =====================================================
 
         console.log(
@@ -490,7 +489,7 @@ const CallPage = () => {
         }
 
         // =====================================================
-        // ENABLE CAMERA AFTER JOIN
+        // ENABLE CAMERA
         // =====================================================
 
         try {
@@ -515,7 +514,7 @@ const CallPage = () => {
         }
 
         // =====================================================
-        // ENABLE MICROPHONE AFTER JOIN
+        // ENABLE MICROPHONE
         // =====================================================
 
         try {
@@ -568,6 +567,7 @@ const CallPage = () => {
               STREAM_API_KEY
             );
 
+          // Connect only if not already connected
           if (!chatClient.userID) {
             await chatClient.connectUser(
               user,
@@ -579,6 +579,9 @@ const CallPage = () => {
             );
           }
 
+          // IMPORTANT:
+          // chatChannelId is the Stream Chat channel ID,
+          // NOT the Stream Video call ID.
           const channel =
             chatClient.channel(
               "messaging",
@@ -801,12 +804,10 @@ const CallPage = () => {
             navigate("/")
           }
           style={{
-            background:
-              "#00a884",
+            background: "#00a884",
             color: "#fff",
             border: "none",
-            padding:
-              "10px 20px",
+            padding: "10px 20px",
             borderRadius: 8,
             cursor: "pointer",
           }}
@@ -861,10 +862,8 @@ const CallPage = () => {
           style={{
             textAlign: "center",
             display: "flex",
-            flexDirection:
-              "column",
-            alignItems:
-              "center",
+            flexDirection: "column",
+            alignItems: "center",
           }}
         >
           {/* Avatar */}
@@ -872,8 +871,7 @@ const CallPage = () => {
           <div
             className="wa-avatar-pulse-container"
             style={{
-              position:
-                "relative",
+              position: "relative",
               marginBottom: 24,
             }}
           >
@@ -883,17 +881,13 @@ const CallPage = () => {
               style={{
                 width: 110,
                 height: 110,
-                borderRadius:
-                  "50%",
+                borderRadius: "50%",
                 background:
                   "var(--wa-green-dark)",
                 display: "flex",
-                alignItems:
-                  "center",
-                justifyContent:
-                  "center",
-                position:
-                  "relative",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
                 zIndex: 2,
                 border:
                   "3px solid var(--wa-green)",
@@ -911,8 +905,7 @@ const CallPage = () => {
               fontSize: 24,
               fontWeight: 600,
               color: "#e9edef",
-              margin:
-                "0 0 8px",
+              margin: "0 0 8px",
             }}
           >
             Calling...
@@ -923,8 +916,7 @@ const CallPage = () => {
               fontSize: 14,
               color:
                 "var(--wa-text-muted)",
-              margin:
-                "0 0 48px",
+              margin: "0 0 48px",
             }}
           >
             Waiting for recipient
@@ -938,25 +930,20 @@ const CallPage = () => {
             style={{
               width: 60,
               height: 60,
-              borderRadius:
-                "50%",
+              borderRadius: "50%",
               backgroundColor:
                 "#ea0038",
               border: "none",
               color: "#fff",
               display: "flex",
-              alignItems:
-                "center",
-              justifyContent:
-                "center",
+              alignItems: "center",
+              justifyContent: "center",
               cursor: "pointer",
             }}
             className="call-btn-hover"
             title="Cancel Call"
           >
-            <PhoneOffIcon
-              size={24}
-            />
+            <PhoneOffIcon size={24} />
           </button>
         </div>
       </div>
@@ -975,13 +962,9 @@ const CallPage = () => {
       }}
     >
       {client && call ? (
-        <StreamVideo
-          client={client}
-        >
+        <StreamVideo client={client}>
           <StreamTheme>
-            <StreamCall
-              call={call}
-            >
+            <StreamCall call={call}>
               <CallContent
                 setParticipantsCount={
                   setParticipantsCount
@@ -991,9 +974,7 @@ const CallPage = () => {
           </StreamTheme>
         </StreamVideo>
       ) : (
-        <div
-          className="flex items-center justify-center w-full h-full text-white"
-        >
+        <div className="flex items-center justify-center w-full h-full text-white">
           <p>
             Could not initialize
             video call.
@@ -1013,15 +994,16 @@ const CallContent = ({
 }) => {
   const {
     useCallCallingState,
-    useCallParticipants,
-  } =
-    useCallStateHooks();
+    useParticipants,
+  } = useCallStateHooks();
 
   const callingState =
     useCallCallingState();
 
+  // IMPORTANT:
+  // useParticipants() is the correct Stream hook.
   const participants =
-    useCallParticipants();
+    useParticipants();
 
   const navigate =
     useNavigate();
@@ -1031,10 +1013,6 @@ const CallContent = ({
   // =========================================================
 
   useEffect(() => {
-    if (!participants) {
-      return;
-    }
-
     console.log(
       "👥 Participants:",
       participants.length
@@ -1141,8 +1119,7 @@ const CallContent = ({
               fontSize: 14,
             }}
           >
-            Call status:{" "}
-            {callingState}
+            Call status: {callingState}
           </p>
         </div>
       </div>
@@ -1162,7 +1139,7 @@ const CallContent = ({
     >
       {/* =====================================================
           VIDEO
-          ===================================================== */}
+      ===================================================== */}
 
       <div
         style={{
@@ -1177,20 +1154,16 @@ const CallContent = ({
 
       {/* =====================================================
           CONTROLS
-          ===================================================== */}
+      ===================================================== */}
 
       <div
         style={{
           width: "100%",
           display: "flex",
-          justifyContent:
-            "center",
-          alignItems:
-            "center",
-          padding:
-            "12px 0 20px",
-          background:
-            "#0a1014",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "12px 0 20px",
+          background: "#0a1014",
         }}
       >
         <CallControls />
