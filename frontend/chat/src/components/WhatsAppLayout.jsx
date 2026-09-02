@@ -348,6 +348,8 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { StreamChat } from "stream-chat";
+import { StreamVideoClient } from "@stream-io/video-react-sdk";
+
 import {
   Chat,
   Channel,
@@ -356,9 +358,11 @@ import {
   MessageInput,
   Thread,
 } from "stream-chat-react";
+
 import toast from "react-hot-toast";
 
 import useAuthUser from "../hooks/useAuthUser";
+
 import {
   getStreamToken,
   getFriendRequests,
@@ -382,15 +386,7 @@ const STREAM_API_KEY =
   import.meta.env.VITE_STREAM_API_KEY;
 
 const WhatsAppLayout = () => {
-  // =========================================================
-  // AUTH USER
-  // =========================================================
-
   const { authUser } = useAuthUser();
-
-  // =========================================================
-  // STATES
-  // =========================================================
 
   const [activeTab, setActiveTab] =
     useState("chats");
@@ -430,7 +426,7 @@ const WhatsAppLayout = () => {
   });
 
   // =========================================================
-  // FRIEND REQUESTS / NOTIFICATIONS
+  // FRIEND REQUESTS
   // =========================================================
 
   const { data: friendRequests } = useQuery({
@@ -452,15 +448,14 @@ const WhatsAppLayout = () => {
       if (
         !tokenData?.token ||
         !authUser ||
-        chatClient ||
-        !STREAM_API_KEY
+        chatClient
       ) {
         return;
       }
 
       try {
         console.log(
-          "Initializing Stream Chat..."
+          "🔵 Initializing Stream Chat..."
         );
 
         const client =
@@ -468,7 +463,6 @@ const WhatsAppLayout = () => {
             STREAM_API_KEY
           );
 
-        // Connect user only if not already connected
         if (!client.userID) {
           await client.connectUser(
             {
@@ -478,21 +472,9 @@ const WhatsAppLayout = () => {
             },
             tokenData.token
           );
-
-          console.log(
-            "✅ Stream Chat connected"
-          );
-        } else {
-          console.log(
-            "✅ Stream Chat already connected"
-          );
         }
 
         setChatClient(client);
-
-        // =====================================================
-        // WATCH USER'S MESSAGING CHANNELS
-        // =====================================================
 
         await client.queryChannels(
           {
@@ -508,16 +490,12 @@ const WhatsAppLayout = () => {
         );
 
         console.log(
-          "✅ User channels are being watched"
+          "✅ Stream Chat ready"
         );
-      } catch (err) {
+      } catch (error) {
         console.error(
-          "❌ Stream initialization error:",
-          err
-        );
-
-        toast.error(
-          "Could not connect to chat"
+          "❌ Stream Chat initialization error:",
+          error
         );
       }
     };
@@ -530,7 +508,7 @@ const WhatsAppLayout = () => {
   ]);
 
   // =========================================================
-  // GLOBAL INCOMING CALL LISTENER
+  // INCOMING CALL LISTENER
   // =========================================================
 
   useEffect(() => {
@@ -539,15 +517,11 @@ const WhatsAppLayout = () => {
     }
 
     console.log(
-      "Setting up incoming call listener..."
+      "📞 Starting incoming call listener"
     );
 
     const listener = chatClient.on(
       (event) => {
-        // -----------------------------------------------------
-        // CHECK FOR INCOMING VIDEO CALL
-        // -----------------------------------------------------
-
         if (
           (
             event.type === "message.new" ||
@@ -560,43 +534,39 @@ const WhatsAppLayout = () => {
             authUser._id
         ) {
           console.log(
-            "📞 Incoming video call received"
+            "📞 Incoming call detected"
           );
 
           console.log(
-            "Call ID:",
+            "Video Call ID:",
             event.message.callId
+          );
+
+          console.log(
+            "Chat Channel ID:",
+            event.message.channelId
           );
 
           setIncomingCall({
             callId:
               event.message.callId,
 
+            channelId:
+              event.message.channelId ||
+              event.channel_id,
+
             callerName:
               event.message.callerName,
 
             callerPic:
               event.message.callerPic,
-
-            channelId:
-              event.channel_id,
           });
         }
       }
     );
 
-    // =======================================================
-    // CLEANUP LISTENER
-    // =======================================================
-
     return () => {
-      console.log(
-        "Removing incoming call listener"
-      );
-
-      if (listener?.unsubscribe) {
-        listener.unsubscribe();
-      }
+      listener?.unsubscribe?.();
     };
   }, [
     chatClient,
@@ -618,30 +588,16 @@ const WhatsAppLayout = () => {
       }
 
       setChatLoading(true);
-
-      // Close search when changing contact
       setShowSearchPanel(false);
 
       try {
-        // =====================================================
-        // EXISTING CHANNEL
-        // =====================================================
-
         if (selectedFriend.cid) {
           await selectedFriend.watch();
 
           setChannel(selectedFriend);
 
-          console.log(
-            "✅ Existing channel opened"
-          );
-
           return;
         }
-
-        // =====================================================
-        // CREATE / OPEN NEW CHANNEL
-        // =====================================================
 
         const memberIds = Array.from(
           new Set([
@@ -657,29 +613,26 @@ const WhatsAppLayout = () => {
                 .sort()
                 .join("-");
 
-        const ch = chatClient.channel(
-          "messaging",
-          channelId,
-          {
-            members: memberIds,
-          }
-        );
+        const ch =
+          chatClient.channel(
+            "messaging",
+            channelId,
+            {
+              members: memberIds,
+            }
+          );
 
         await ch.watch();
 
         setChannel(ch);
-
-        console.log(
-          "✅ New channel opened"
-        );
-      } catch (err) {
+      } catch (error) {
         console.error(
           "❌ Channel open error:",
-          err
+          error
         );
 
         toast.error(
-          "Could not open chat. Please try again."
+          "Could not open chat."
         );
       } finally {
         setChatLoading(false);
@@ -700,53 +653,106 @@ const WhatsAppLayout = () => {
   const handleVideoCall = async () => {
     if (!channel) {
       toast.error(
-        "Please select a chat first."
+        "Select a chat first."
       );
-
       return;
     }
 
     if (!authUser) {
-      toast.error(
-        "User information is not available."
-      );
-
       return;
     }
 
+    if (!tokenData?.token) {
+      toast.error(
+        "Stream token is not ready."
+      );
+      return;
+    }
+
+    let videoClient = null;
+
     try {
       console.log(
-        "================================="
+        "================================"
       );
 
       console.log(
-        "📞 Starting video call..."
+        "📞 STARTING VIDEO CALL"
+      );
+
+      // -----------------------------------------------------
+      // GENERATE UNIQUE VIDEO CALL ID
+      // -----------------------------------------------------
+
+      const callId =
+        crypto.randomUUID();
+
+      console.log(
+        "Video Call ID:",
+        callId
       );
 
       console.log(
-        "Call ID:",
+        "Chat Channel:",
         channel.id
       );
 
-      console.log(
-        "Caller:",
-        authUser.fullName
-      );
+      // -----------------------------------------------------
+      // CREATE STREAM VIDEO CLIENT
+      // -----------------------------------------------------
+
+      videoClient =
+        new StreamVideoClient({
+          apiKey: STREAM_API_KEY,
+
+          user: {
+            id: authUser._id,
+            name: authUser.fullName,
+            image: authUser.profilePic,
+          },
+
+          token: tokenData.token,
+        });
 
       console.log(
-        "================================="
+        "✅ Video client created"
       );
 
-      // =====================================================
-      // SEND INCOMING CALL INVITATION
-      // =====================================================
+      // -----------------------------------------------------
+      // CREATE VIDEO CALL BEFORE INVITING USER
+      // -----------------------------------------------------
+
+      const videoCall =
+        videoClient.call(
+          "default",
+          callId
+        );
+
+      await videoCall.getOrCreate({
+        data: {
+          created_by_id:
+            authUser._id,
+        },
+      });
+
+      console.log(
+        "✅ Video call created"
+      );
+
+      // -----------------------------------------------------
+      // SEND CHAT INVITE
+      // -----------------------------------------------------
 
       await channel.sendMessage({
         text: "Incoming video call...",
+
         customType: "call_invite",
 
-        // Same ID will be used by Stream Video
-        callId: channel.id,
+        // Video call ID
+        callId: callId,
+
+        // Chat channel ID
+        channelId: channel.id,
 
         callerName:
           authUser.fullName,
@@ -759,175 +765,212 @@ const WhatsAppLayout = () => {
         "✅ Call invitation sent"
       );
 
-      // =====================================================
-      // GO TO CALL PAGE
-      // =====================================================
-
-      window.location.href =
-        `/call/${channel.id}?calling=true`;
-    } catch (err) {
-      console.error(
-        "❌ Error starting call:",
-        err
+      console.log(
+        "================================"
       );
 
+      // -----------------------------------------------------
+      // DISCONNECT TEMPORARY CLIENT
+      // -----------------------------------------------------
+
+      await videoClient.disconnectUser();
+
+      videoClient = null;
+
+      // -----------------------------------------------------
+      // NAVIGATE CALLER
+      // -----------------------------------------------------
+
+      window.location.href =
+        `/call/${callId}?calling=true&channelId=${encodeURIComponent(
+          channel.id
+        )}`;
+
+    } catch (error) {
+      console.error(
+        "❌ VIDEO CALL ERROR:",
+        error
+      );
+
+      if (videoClient) {
+        try {
+          await videoClient.disconnectUser();
+        } catch {}
+      }
+
       toast.error(
-        "Failed to start call"
+        "Failed to start video call."
       );
     }
   };
 
   // =========================================================
-  // ACCEPT INCOMING CALL
+  // ACCEPT CALL
   // =========================================================
 
   const handleAcceptCall = () => {
     if (!incomingCall?.callId) {
       console.error(
-        "No incoming call ID found"
+        "❌ Missing call ID"
       );
-
       return;
     }
 
     const callId =
       incomingCall.callId;
 
+    const channelId =
+      incomingCall.channelId;
+
     console.log(
-      "📞 Accepting call:",
+      "📞 ACCEPTING VIDEO CALL"
+    );
+
+    console.log(
+      "Video Call ID:",
       callId
     );
 
-    // Clear popup before navigation
+    console.log(
+      "Chat Channel ID:",
+      channelId
+    );
+
+    // Remove popup immediately
     setIncomingCall(null);
 
-    // Receiver joins same Stream Video call
+    // Join existing Stream Video call
     window.location.href =
-      `/call/${callId}`;
+      `/call/${callId}?channelId=${encodeURIComponent(
+        channelId
+      )}`;
   };
 
   // =========================================================
-  // DECLINE INCOMING CALL
+  // DECLINE CALL
   // =========================================================
 
-  const handleDeclineCall = async () => {
-    if (!incomingCall?.callId) {
-      setIncomingCall(null);
-      return;
-    }
-
-    const callId =
-      incomingCall.callId;
-
-    try {
-      console.log(
-        "📞 Declining call:",
-        callId
-      );
-
-      if (!chatClient) {
-        console.error(
-          "Chat client unavailable"
-        );
-
+  const handleDeclineCall =
+    async () => {
+      if (!incomingCall) {
         return;
       }
 
-      // Get the same messaging channel
-      const ch =
-        chatClient.channel(
-          "messaging",
-          callId
+      try {
+        const channelId =
+          incomingCall.channelId;
+
+        if (!chatClient || !channelId) {
+          throw new Error(
+            "Chat channel unavailable"
+          );
+        }
+
+        console.log(
+          "📞 DECLINING CALL"
         );
 
-      await ch.watch();
+        const ch =
+          chatClient.channel(
+            "messaging",
+            channelId
+          );
 
-      // Send rejection message
-      await ch.sendMessage({
-        text: "Call declined",
-        customType: "call_reject",
-        callId: callId,
-      });
+        await ch.watch();
 
-      console.log(
-        "✅ Call rejection sent"
-      );
-    } catch (err) {
-      console.error(
-        "❌ Error declining call:",
-        err
-      );
-    } finally {
-      // Close popup
-      setIncomingCall(null);
-    }
-  };
+        await ch.sendMessage({
+          text: "Call declined",
 
-  // =========================================================
-  // MOBILE CHAT
-  // =========================================================
+          customType:
+            "call_reject",
 
-  const handleSelectFriend = (
-    friend
-  ) => {
-    setSelectedFriend(friend);
-    setMobileChatOpen(true);
-  };
+          callId:
+            incomingCall.callId,
 
-  const handleBackFromChat = () => {
-    setMobileChatOpen(false);
-  };
+          channelId: channelId,
+        });
+
+        console.log(
+          "✅ Call declined"
+        );
+      } catch (error) {
+        console.error(
+          "❌ Decline error:",
+          error
+        );
+      } finally {
+        setIncomingCall(null);
+      }
+    };
 
   // =========================================================
-  // TAB CHANGE
+  // MOBILE
   // =========================================================
 
-  const handleTabChange = (
-    tab
-  ) => {
-    setActiveTab(tab);
-    setActiveStatusGroup(null);
-  };
+  const handleSelectFriend =
+    (friend) => {
+      setSelectedFriend(friend);
+      setMobileChatOpen(true);
+    };
+
+  const handleBackFromChat =
+    () => {
+      setMobileChatOpen(false);
+    };
 
   // =========================================================
-  // STATUS VIEW
+  // TABS
   // =========================================================
 
-  const handleStatusViewed = async (
-    statusId
-  ) => {
-    try {
-      await viewStatus(statusId);
-    } catch (err) {
-      console.error(
-        "❌ Error marking status as viewed:",
-        err
-      );
-    }
-  };
+  const handleTabChange =
+    (tab) => {
+      setActiveTab(tab);
+      setActiveStatusGroup(null);
+    };
+
+  // =========================================================
+  // STATUS
+  // =========================================================
+
+  const handleStatusViewed =
+    async (statusId) => {
+      try {
+        await viewStatus(statusId);
+      } catch (error) {
+        console.error(
+          "Status view error:",
+          error
+        );
+      }
+    };
 
   // =========================================================
   // MESSAGE SEARCH
   // =========================================================
 
-  const handleSelectMessage = (
-    messageId
-  ) => {
-    const element =
-      document.querySelector(
-        `[data-message-id="${messageId}"]`
-      ) ||
-      document.getElementById(
-        `message-${messageId}`
-      ) ||
-      document.querySelector(
-        `.str-chat__message[data-testid*="${messageId}"]`
-      ) ||
-      document.querySelector(
-        `[data-testid="message-wrapper"]`
-      );
+  const handleSelectMessage =
+    (messageId) => {
+      const element =
+        document.querySelector(
+          `[data-message-id="${messageId}"]`
+        ) ||
+        document.getElementById(
+          `message-${messageId}`
+        ) ||
+        document.querySelector(
+          `.str-chat__message[data-testid*="${messageId}"]`
+        ) ||
+        document.querySelector(
+          `[data-testid="message-wrapper"]`
+        );
 
-    if (element) {
+      if (!element) {
+        toast.error(
+          "Could not locate message"
+        );
+        return;
+      }
+
       element.scrollIntoView({
         behavior: "smooth",
         block: "center",
@@ -942,15 +985,10 @@ const WhatsAppLayout = () => {
           "flash-highlight"
         );
       }, 2000);
-    } else {
-      toast.error(
-        "Could not locate message in view"
-      );
-    }
-  };
+    };
 
   // =========================================================
-  // RENDER
+  // UI
   // =========================================================
 
   return (
@@ -965,6 +1003,7 @@ const WhatsAppLayout = () => {
           callerName={
             incomingCall.callerName
           }
+
           callerPic={
             incomingCall.callerPic
           }
@@ -980,7 +1019,7 @@ const WhatsAppLayout = () => {
       )}
 
       {/* =====================================================
-          1. ICON SIDEBAR
+          SIDEBAR
           ===================================================== */}
 
       <IconSidebar
@@ -992,7 +1031,7 @@ const WhatsAppLayout = () => {
       />
 
       {/* =====================================================
-          2. LEFT PANEL
+          LEFT PANEL
           ===================================================== */}
 
       <div
@@ -1025,7 +1064,7 @@ const WhatsAppLayout = () => {
       </div>
 
       {/* =====================================================
-          3. RIGHT PANEL
+          RIGHT PANEL
           ===================================================== */}
 
       <div
@@ -1052,7 +1091,7 @@ const WhatsAppLayout = () => {
         >
 
           {/* =================================================
-              STATUS TAB
+              STATUS
               ================================================= */}
 
           {activeTab === "status" ? (
@@ -1099,7 +1138,7 @@ const WhatsAppLayout = () => {
                     fill="var(--wa-green)"
                     opacity="0.6"
                   >
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39-2.1 1.42z" />
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
                   </svg>
                 </div>
 
@@ -1120,7 +1159,7 @@ const WhatsAppLayout = () => {
             chatClient ? (
 
             /* =================================================
-               CHAT TAB
+               CHAT
                ================================================= */
 
             chatLoading ? (
@@ -1129,17 +1168,15 @@ const WhatsAppLayout = () => {
 
             ) : channel ? (
 
-              <Chat client={chatClient}>
+              <Chat
+                client={chatClient}
+              >
 
                 <Channel
                   channel={channel}
                 >
 
                   <Window hideOnThread>
-
-                    {/* =================================================
-                        CHAT HEADER
-                        ================================================= */}
 
                     <div
                       style={{
@@ -1153,8 +1190,6 @@ const WhatsAppLayout = () => {
                           "1px solid var(--wa-divider)",
                       }}
                     >
-
-                      {/* Mobile back button */}
 
                       <button
                         onClick={
@@ -1182,8 +1217,6 @@ const WhatsAppLayout = () => {
                         />
                       </button>
 
-                      {/* Header */}
-
                       <div
                         style={{
                           flex: 1,
@@ -1203,23 +1236,13 @@ const WhatsAppLayout = () => {
 
                     </div>
 
-                    {/* =================================================
-                        MESSAGE LIST
-                        ================================================= */}
-
                     <MessageList />
-
-                    {/* =================================================
-                        MESSAGE INPUT
-                        ================================================= */}
 
                     <MessageInput
                       focus
                     />
 
                   </Window>
-
-                  {/* Thread */}
 
                   <Thread />
 
@@ -1232,7 +1255,7 @@ const WhatsAppLayout = () => {
           ) : (
 
             /* =================================================
-               EMPTY CHAT STATE
+               EMPTY STATE
                ================================================= */
 
             <div className="wa-empty-state">
@@ -1304,7 +1327,7 @@ const WhatsAppLayout = () => {
         </div>
 
         {/* =====================================================
-            4. SEARCH PANEL
+            SEARCH PANEL
             ===================================================== */}
 
         {showSearchPanel &&
