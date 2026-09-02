@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   SearchIcon,
   PenSquareIcon,
+  BellIcon,
 } from "lucide-react";
 
 import { getUserFriends } from "../lib/api";
@@ -36,25 +37,20 @@ const LeftPanel = ({
   const [search, setSearch] = useState("");
   const [showNewChat, setShowNewChat] = useState(false);
 
-  // Fetch friends list for Chat list and New Chat panel
+  // Fetch friends list
   const { data: friends = [] } = useQuery({
     queryKey: ["friends"],
     queryFn: getUserFriends,
   });
 
-  const showSearch = [
-    "chats",
-    "discover",
-  ].includes(activeTab);
+  const showSearch = ["chats", "discover"].includes(activeTab);
 
   // New Chat panel
   if (showNewChat) {
     return (
       <NewChatPanel
         friends={friends}
-        onClose={() =>
-          setShowNewChat(false)
-        }
+        onClose={() => setShowNewChat(false)}
         onSelectFriend={setSelectedFriend}
       />
     );
@@ -65,33 +61,39 @@ const LeftPanel = ({
       {/* Header */}
       <div className="wa-panel-header">
         <span className="wa-panel-title">
-          {TAB_TITLES[activeTab] ||
-            "Socialize"}
+          {TAB_TITLES[activeTab] || "Socialize"}
         </span>
 
-        <div className="wa-header-actions">
-          {/* New Chat */}
-          {activeTab === "chats" && (
+        {/* Header actions */}
+        {activeTab === "chats" && (
+          <div className="wa-header-actions">
+
+            {/* Notifications */}
             <button
               className="wa-header-btn notification-header-btn"
-              title="New Chat"
-              onClick={() =>
-                setShowNewChat(true)
-              }
+              title="Notifications"
+              onClick={() => setActiveTab("notifications")}
             >
-              <PenSquareIcon size={20} />
+              <BellIcon size={20} />
 
-              {/* Notification badge */}
               {notifCount > 0 && (
                 <span className="notification-header-badge">
-                  {notifCount > 99
-                    ? "99+"
-                    : notifCount}
+                  {notifCount > 99 ? "99+" : notifCount}
                 </span>
               )}
             </button>
-          )}
-        </div>
+
+            {/* New Chat */}
+            <button
+              className="wa-header-btn"
+              title="New Chat"
+              onClick={() => setShowNewChat(true)}
+            >
+              <PenSquareIcon size={20} />
+            </button>
+
+          </div>
+        )}
       </div>
 
       {/* Search bar */}
@@ -109,10 +111,8 @@ const LeftPanel = ({
               position: "absolute",
               left: 22,
               top: "50%",
-              transform:
-                "translateY(-50%)",
-              color:
-                "var(--wa-text-muted)",
+              transform: "translateY(-50%)",
+              color: "var(--wa-text-muted)",
             }}
           />
 
@@ -125,26 +125,21 @@ const LeftPanel = ({
             }
             className="wa-search-input"
             value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       )}
 
       {/* Tab content */}
       <div className="wa-panel-content">
+
         {/* Chats */}
         {activeTab === "chats" && (
           <ChatListTab
             friends={friends}
             search={search}
-            selectedFriend={
-              selectedFriend
-            }
-            setSelectedFriend={
-              setSelectedFriend
-            }
+            selectedFriend={selectedFriend}
+            setSelectedFriend={setSelectedFriend}
           />
         )}
 
@@ -152,18 +147,14 @@ const LeftPanel = ({
         {activeTab === "groups" && (
           <GroupsTab
             chatClient={chatClient}
-            onSelectGroupChannel={
-              setSelectedFriend
-            }
+            onSelectGroupChannel={setSelectedFriend}
           />
         )}
 
         {/* Status */}
         {activeTab === "status" && (
           <StatusTab
-            onSelectStatusGroup={
-              onSelectStatusGroup
-            }
+            onSelectStatusGroup={onSelectStatusGroup}
           />
         )}
 
@@ -176,8 +167,7 @@ const LeftPanel = ({
         )}
 
         {/* Notifications */}
-        {activeTab ===
-          "notifications" && (
+        {activeTab === "notifications" && (
           <NotificationsTab />
         )}
 
@@ -185,6 +175,7 @@ const LeftPanel = ({
         {activeTab === "settings" && (
           <SettingsPanel />
         )}
+
       </div>
     </div>
   );

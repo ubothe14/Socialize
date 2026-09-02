@@ -6,7 +6,6 @@
    SOCIALIZE — WhatsApp Web Style
    ============================================= */
 
-/* Root Variables */
 :root {
   --wa-bg-darker: #0a1014;
   --wa-sidebar-bg: #111b21;
@@ -27,7 +26,9 @@
   --wa-red: #f15c6d;
 }
 
-/* ── Full App Shell ────────────────────────── */
+/* =============================================
+   FULL APP SHELL
+   ============================================= */
 
 .wa-app {
   display: flex;
@@ -38,7 +39,9 @@
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
-/* ── Narrow Icon Sidebar ───────────────────── */
+/* =============================================
+   NARROW ICON SIDEBAR
+   ============================================= */
 
 .wa-icon-sidebar {
   width: 60px;
@@ -92,7 +95,9 @@
   border-color: var(--wa-green);
 }
 
-/* ── Left Panel ────────────────────────────── */
+/* =============================================
+   LEFT PANEL
+   ============================================= */
 
 .wa-left-panel {
   width: 360px;
@@ -121,6 +126,10 @@
   color: var(--wa-text);
 }
 
+/* =============================================
+   HEADER ACTIONS
+   ============================================= */
+
 .wa-header-actions {
   display: flex;
   align-items: center;
@@ -138,7 +147,10 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  position: relative;
 }
 
 .wa-header-btn:hover {
@@ -146,7 +158,9 @@
   color: var(--wa-text);
 }
 
-/* ── Notification Badge Beside New Chat ─────── */
+/* =============================================
+   NOTIFICATION BELL + BADGE
+   ============================================= */
 
 .notification-header-btn {
   position: relative;
@@ -155,29 +169,37 @@
 .notification-header-badge {
   position: absolute;
   top: -2px;
-  right: -5px;
+  right: -4px;
   min-width: 17px;
   height: 17px;
   padding: 0 4px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   background: var(--wa-green);
-  color: #fff;
-  border-radius: 10px;
+  color: #ffffff;
+
+  border-radius: 999px;
   border: 2px solid var(--wa-panel-header);
+
   font-size: 10px;
   font-weight: 700;
   line-height: 1;
+
   pointer-events: none;
 }
 
-/* ── Search bar ────────────────────────────── */
+/* =============================================
+   SEARCH BAR
+   ============================================= */
 
 .wa-search-wrap {
   padding: 8px 12px;
   background: var(--wa-sidebar-bg);
   flex-shrink: 0;
+  position: relative;
 }
 
 .wa-search-input {
@@ -203,7 +225,9 @@
   color: var(--wa-text-muted);
 }
 
-/* ── Scrollable content area ───────────────── */
+/* =============================================
+   SCROLLABLE CONTENT
+   ============================================= */
 
 .wa-panel-content {
   flex: 1;
@@ -224,7 +248,9 @@
   border-radius: 2px;
 }
 
-/* ── Chat list item ────────────────────────── */
+/* =============================================
+   CHAT LIST ITEM
+   ============================================= */
 
 .wa-chat-item {
   display: flex;
@@ -283,7 +309,9 @@
   white-space: nowrap;
 }
 
-/* ── Section label ─────────────────────────── */
+/* =============================================
+   SECTION LABEL
+   ============================================= */
 
 .wa-section-label {
   padding: 12px 16px 6px;
@@ -294,7 +322,9 @@
   letter-spacing: 0.5px;
 }
 
-/* ── Discover / user card ─────────────────── */
+/* =============================================
+   DISCOVER / USER CARD
+   ============================================= */
 
 .wa-user-row {
   display: flex;
@@ -341,11 +371,13 @@
   margin-top: 2px;
 }
 
-/* ── Buttons ───────────────────────────────── */
+/* =============================================
+   BUTTONS
+   ============================================= */
 
 .wa-btn-primary {
   background: var(--wa-green);
-  color: #fff;
+  color: #ffffff;
   border: none;
   padding: 6px 14px;
   border-radius: 20px;
@@ -375,7 +407,9 @@
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .wa-btn-ghost:hover {
@@ -400,7 +434,9 @@
   background: rgba(241, 92, 109, 0.1);
 }
 
-/* ── Notification request card ────────────── */
+/* =============================================
+   NOTIFICATION REQUEST CARD
+   ============================================= */
 
 .wa-notif-card {
   padding: 12px 16px;
@@ -412,7 +448,9 @@
   background: var(--wa-hover);
 }
 
-/* ── Right Panel ───────────────────────────── */
+/* =============================================
+   RIGHT PANEL
+   ============================================= */
 
 .wa-right-panel {
   flex: 1;
@@ -424,7 +462,9 @@
   overflow: hidden;
 }
 
-/* ── Gemini full-width right panel ────────── */
+/* =============================================
+   GEMINI FULL WIDTH
+   ============================================= */
 
 .ai-full-panel {
   flex: 1 1 auto !important;
@@ -432,7 +472,9 @@
   min-width: 0 !important;
 }
 
-/* ── WhatsApp dot pattern background ──────── */
+/* =============================================
+   WHATSAPP BACKGROUND
+   ============================================= */
 
 .wa-chat-bg {
   flex: 1;
@@ -440,10 +482,13 @@
   flex-direction: column;
   overflow: hidden;
   background-color: #0d1418;
+
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='1' fill='%23ffffff08'/%3E%3C/svg%3E");
 }
 
-/* ── Empty state ───────────────────────────── */
+/* =============================================
+   EMPTY STATE
+   ============================================= */
 
 .wa-empty-state {
   flex: 1;
@@ -453,7 +498,9 @@
   justify-content: center;
   gap: 16px;
   color: var(--wa-text-muted);
+
   background: #0d1418;
+
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='1' fill='%23ffffff08'/%3E%3C/svg%3E");
 }
 
@@ -471,7 +518,9 @@
   line-height: 1.6;
 }
 
-/* ── Stream Chat overrides ─────────────────── */
+/* =============================================
+   STREAM CHAT OVERRIDES
+   ============================================= */
 
 .str-chat,
 .str-chat-channel,
@@ -501,7 +550,9 @@
 
 .str-chat__list {
   background: #0d1418 !important;
+
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='1' fill='%23ffffff08'/%3E%3C/svg%3E") !important;
+
   padding: 12px 16px !important;
   flex: 1 !important;
   min-height: 0 !important;
@@ -519,7 +570,9 @@
   width: 100% !important;
 }
 
-.str-chat__message-input .str-chat__textarea textarea {
+.str-chat__message-input
+  .str-chat__textarea
+  textarea {
   background: var(--wa-search-bg) !important;
   color: var(--wa-text) !important;
   border-radius: 8px !important;
@@ -528,7 +581,8 @@
 
 /* Sent message bubble */
 
-.str-chat__message--me .str-chat__message-bubble {
+.str-chat__message--me
+  .str-chat__message-bubble {
   background: var(--wa-sent-bg) !important;
   color: var(--wa-text) !important;
 }
@@ -541,7 +595,9 @@
   color: var(--wa-text) !important;
 }
 
-/* ── Custom Channel Header ─────────────────── */
+/* =============================================
+   CUSTOM CHANNEL HEADER
+   ============================================= */
 
 .custom-chat-header {
   display: flex;
@@ -572,7 +628,7 @@
   height: 36px;
   border-radius: 50%;
   background: var(--wa-green);
-  color: #fff;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -681,7 +737,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .custom-chat-header__action-btn:hover {
@@ -689,7 +747,9 @@
   color: var(--wa-text);
 }
 
-/* ── Settings Panel ────────────────────────── */
+/* =============================================
+   SETTINGS PANEL
+   ============================================= */
 
 .wa-settings {
   display: flex;
@@ -741,14 +801,18 @@
   display: block;
 }
 
-/* ── Scrollbar global ──────────────────────── */
+/* =============================================
+   GLOBAL SCROLLBAR
+   ============================================= */
 
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--wa-divider) transparent;
 }
 
-/* ── Responsive ────────────────────────────── */
+/* =============================================
+   RESPONSIVE
+   ============================================= */
 
 @media (max-width: 768px) {
   .wa-left-panel {
@@ -782,7 +846,7 @@
 }
 
 /* =============================================
-   STATUS PLAYER STYLING
+   STATUS PLAYER
    ============================================= */
 
 .status-player-container {
@@ -802,12 +866,15 @@
   left: 0;
   width: 100%;
   padding: 16px;
+
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0.8),
     rgba(0, 0, 0, 0)
   );
+
   z-index: 20;
+
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -975,7 +1042,9 @@
   right: 32px;
 }
 
-/* Custom dashed border for unviewed status */
+/* =============================================
+   STATUS AVATAR
+   ============================================= */
 
 .wa-status-avatar-wrapper {
   position: relative;
@@ -1009,7 +1078,9 @@
   object-fit: cover;
 }
 
-/* ── Modal builder for creating status ─────── */
+/* =============================================
+   STATUS BUILDER
+   ============================================= */
 
 .status-builder-overlay {
   position: fixed;
@@ -1072,7 +1143,7 @@
 }
 
 /* =============================================
-   MESSAGE SEARCH PANEL & GROUP MODAL
+   MESSAGE SEARCH PANEL
    ============================================= */
 
 .wa-search-panel {
@@ -1128,7 +1199,9 @@
   margin-top: 2px;
 }
 
-/* Highlight Flash Animation */
+/* =============================================
+   HIGHLIGHT FLASH
+   ============================================= */
 
 .flash-highlight {
   animation: flashBg 2s ease-out;
@@ -1144,7 +1217,9 @@
   }
 }
 
-/* Groups Creation / Members list builder */
+/* =============================================
+   GROUP BUILDER
+   ============================================= */
 
 .group-builder-overlay {
   position: fixed;
@@ -1196,7 +1271,7 @@
 }
 
 /* =============================================
-   PULSING ANIMATIONS FOR INCOMING CALLS
+   INCOMING CALL ANIMATION
    ============================================= */
 
 .wa-avatar-pulse-container {
@@ -1236,9 +1311,9 @@
   transform: scale(1.1);
 }
 
-/* =========================================================
+/* =============================================
    GEMINI AI CHAT
-   ========================================================= */
+   ============================================= */
 
 .ai-chat-page {
   display: flex;
@@ -1276,7 +1351,7 @@
   align-items: center;
   justify-content: center;
   background: var(--wa-green);
-  color: white;
+  color: #ffffff;
   flex-shrink: 0;
 }
 
@@ -1327,7 +1402,9 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+
   background: #0d1418;
+
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='1' fill='%23ffffff08'/%3E%3C/svg%3E");
 }
 
@@ -1442,12 +1519,14 @@
   border: 0;
   border-radius: 50%;
   background: var(--wa-green);
-  color: white;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.1s, opacity 0.15s;
+  transition:
+    transform 0.1s,
+    opacity 0.15s;
 }
 
 .ai-input-area button:hover:not(:disabled) {
@@ -1459,9 +1538,9 @@
   cursor: not-allowed;
 }
 
-/* =========================================================
+/* =============================================
    GEMINI AI - DESKTOP FULL WIDTH
-   ========================================================= */
+   ============================================= */
 
 .ai-full-panel > div:first-child {
   width: 100%;
@@ -1476,9 +1555,9 @@
   min-width: 0;
 }
 
-/* =========================================================
+/* =============================================
    GEMINI AI - RESPONSIVE
-   ========================================================= */
+   ============================================= */
 
 @media (min-width: 769px) {
   .ai-full-panel .ai-messages {

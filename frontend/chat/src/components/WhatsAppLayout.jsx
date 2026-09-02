@@ -409,7 +409,7 @@ const WhatsAppLayout = () => {
   });
 
   // =========================================================
-  // FRIEND REQUESTS
+  // FRIEND REQUESTS / NOTIFICATIONS
   // =========================================================
 
   const { data: friendRequests } = useQuery({
@@ -419,7 +419,7 @@ const WhatsAppLayout = () => {
     enabled: !!authUser,
   });
 
-  // Notification count is shown beside New Chat
+  // Number of pending incoming friend requests
   const notifCount =
     friendRequests?.incomingReqs?.length || 0;
 
@@ -441,9 +441,7 @@ const WhatsAppLayout = () => {
         console.log("🔵 Initializing Stream Chat...");
 
         const client =
-          StreamChat.getInstance(
-            STREAM_API_KEY
-          );
+          StreamChat.getInstance(STREAM_API_KEY);
 
         if (!client.userID) {
           await client.connectUser(
@@ -500,50 +498,44 @@ const WhatsAppLayout = () => {
       "📞 Starting incoming call listener"
     );
 
-    const listener = chatClient.on(
-      (event) => {
-        if (
-          (
-            event.type === "message.new" ||
-            event.type ===
-              "notification.message_new"
-          ) &&
-          event.message?.customType ===
-            "call_invite" &&
-          event.message?.user?.id !==
-            authUser._id
-        ) {
-          console.log(
-            "📞 Incoming call detected"
-          );
+    const listener = chatClient.on((event) => {
+      if (
+        (
+          event.type === "message.new" ||
+          event.type === "notification.message_new"
+        ) &&
+        event.message?.customType === "call_invite" &&
+        event.message?.user?.id !== authUser._id
+      ) {
+        console.log(
+          "📞 Incoming call detected"
+        );
 
-          console.log(
-            "Video Call ID:",
-            event.message.callId
-          );
+        console.log(
+          "Video Call ID:",
+          event.message.callId
+        );
 
-          console.log(
-            "Chat Channel ID:",
-            event.message.channelId
-          );
+        console.log(
+          "Chat Channel ID:",
+          event.message.channelId
+        );
 
-          setIncomingCall({
-            callId:
-              event.message.callId,
+        setIncomingCall({
+          callId: event.message.callId,
 
-            channelId:
-              event.message.channelId ||
-              event.channel_id,
+          channelId:
+            event.message.channelId ||
+            event.channel_id,
 
-            callerName:
-              event.message.callerName,
+          callerName:
+            event.message.callerName,
 
-            callerPic:
-              event.message.callerPic,
-          });
-        }
+          callerPic:
+            event.message.callerPic,
+        });
       }
-    );
+    });
 
     return () => {
       listener?.unsubscribe?.();
@@ -587,18 +579,15 @@ const WhatsAppLayout = () => {
         const channelId =
           memberIds.length === 1
             ? `self-${authUser._id}`
-            : [...memberIds]
-                .sort()
-                .join("-");
+            : [...memberIds].sort().join("-");
 
-        const ch =
-          chatClient.channel(
-            "messaging",
-            channelId,
-            {
-              members: memberIds,
-            }
-          );
+        const ch = chatClient.channel(
+          "messaging",
+          channelId,
+          {
+            members: memberIds,
+          }
+        );
 
         await ch.watch();
 
@@ -802,152 +791,146 @@ const WhatsAppLayout = () => {
   // DECLINE CALL
   // =========================================================
 
-  const handleDeclineCall =
-    async () => {
-      if (!incomingCall) {
-        return;
+  const handleDeclineCall = async () => {
+    if (!incomingCall) {
+      return;
+    }
+
+    try {
+      const channelId =
+        incomingCall.channelId;
+
+      if (!chatClient || !channelId) {
+        throw new Error(
+          "Chat channel unavailable"
+        );
       }
 
-      try {
-        const channelId =
-          incomingCall.channelId;
+      console.log(
+        "📞 DECLINING CALL"
+      );
 
-        if (!chatClient || !channelId) {
-          throw new Error(
-            "Chat channel unavailable"
-          );
-        }
-
-        console.log(
-          "📞 DECLINING CALL"
+      const ch =
+        chatClient.channel(
+          "messaging",
+          channelId
         );
 
-        const ch =
-          chatClient.channel(
-            "messaging",
-            channelId
-          );
+      await ch.watch();
 
-        await ch.watch();
+      await ch.sendMessage({
+        text: "Call declined",
 
-        await ch.sendMessage({
-          text: "Call declined",
+        customType:
+          "call_reject",
 
-          customType:
-            "call_reject",
+        callId:
+          incomingCall.callId,
 
-          callId:
-            incomingCall.callId,
+        channelId:
+          channelId,
+      });
 
-          channelId:
-            channelId,
-        });
-
-        console.log(
-          "✅ Call declined"
-        );
-      } catch (error) {
-        console.error(
-          "❌ Decline error:",
-          error
-        );
-      } finally {
-        setIncomingCall(null);
-      }
-    };
+      console.log(
+        "✅ Call declined"
+      );
+    } catch (error) {
+      console.error(
+        "❌ Decline error:",
+        error
+      );
+    } finally {
+      setIncomingCall(null);
+    }
+  };
 
   // =========================================================
   // MOBILE
   // =========================================================
 
-  const handleSelectFriend =
-    (friend) => {
-      setSelectedFriend(friend);
-      setMobileChatOpen(true);
-    };
+  const handleSelectFriend = (friend) => {
+    setSelectedFriend(friend);
+    setMobileChatOpen(true);
+  };
 
-  const handleBackFromChat =
-    () => {
-      setMobileChatOpen(false);
-    };
+  const handleBackFromChat = () => {
+    setMobileChatOpen(false);
+  };
 
   // =========================================================
   // TABS
   // =========================================================
 
-  const handleTabChange =
-    (tab) => {
-      setActiveTab(tab);
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
 
-      setActiveStatusGroup(null);
+    setActiveStatusGroup(null);
 
-      setShowSearchPanel(false);
+    setShowSearchPanel(false);
 
-      if (tab === "ai") {
-        setMobileChatOpen(true);
-      } else {
-        setMobileChatOpen(false);
-      }
-    };
+    if (tab === "ai") {
+      setMobileChatOpen(true);
+    } else {
+      setMobileChatOpen(false);
+    }
+  };
 
   // =========================================================
   // STATUS
   // =========================================================
 
-  const handleStatusViewed =
-    async (statusId) => {
-      try {
-        await viewStatus(statusId);
-      } catch (error) {
-        console.error(
-          "Status view error:",
-          error
-        );
-      }
-    };
+  const handleStatusViewed = async (statusId) => {
+    try {
+      await viewStatus(statusId);
+    } catch (error) {
+      console.error(
+        "Status view error:",
+        error
+      );
+    }
+  };
 
   // =========================================================
   // MESSAGE SEARCH
   // =========================================================
 
-  const handleSelectMessage =
-    (messageId) => {
-      const element =
-        document.querySelector(
-          `[data-message-id="${messageId}"]`
-        ) ||
-        document.getElementById(
-          `message-${messageId}`
-        ) ||
-        document.querySelector(
-          `.str-chat__message[data-testid*="${messageId}"]`
-        ) ||
-        document.querySelector(
-          `[data-testid="message-wrapper"]`
-        );
-
-      if (!element) {
-        toast.error(
-          "Could not locate message"
-        );
-        return;
-      }
-
-      element.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-
-      element.classList.add(
-        "flash-highlight"
+  const handleSelectMessage = (messageId) => {
+    const element =
+      document.querySelector(
+        `[data-message-id="${messageId}"]`
+      ) ||
+      document.getElementById(
+        `message-${messageId}`
+      ) ||
+      document.querySelector(
+        `.str-chat__message[data-testid*="${messageId}"]`
+      ) ||
+      document.querySelector(
+        `[data-testid="message-wrapper"]`
       );
 
-      setTimeout(() => {
-        element.classList.remove(
-          "flash-highlight"
-        );
-      }, 2000);
-    };
+    if (!element) {
+      toast.error(
+        "Could not locate message"
+      );
+      return;
+    }
+
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+
+    element.classList.add(
+      "flash-highlight"
+    );
+
+    setTimeout(() => {
+      element.classList.remove(
+        "flash-highlight"
+      );
+    }, 2000);
+  };
 
   // =========================================================
   // UI
@@ -978,7 +961,7 @@ const WhatsAppLayout = () => {
       )}
 
       {/* =====================================================
-          SIDEBAR
+          LEFT ICON SIDEBAR
           ===================================================== */}
 
       <IconSidebar
@@ -990,6 +973,10 @@ const WhatsAppLayout = () => {
 
       {/* =====================================================
           LEFT PANEL
+          
+          IMPORTANT:
+          Notification count is passed HERE.
+          It is NOT passed to IconSidebar.
           ===================================================== */}
 
       {activeTab !== "ai" && (
@@ -1006,9 +993,6 @@ const WhatsAppLayout = () => {
         >
           <LeftPanel
             activeTab={activeTab}
-            setActiveTab={
-              handleTabChange
-            }
             selectedFriend={
               selectedFriend
             }
@@ -1097,7 +1081,8 @@ const WhatsAppLayout = () => {
                   style={{
                     width: 200,
                     height: 200,
-                    borderRadius: "50%",
+                    borderRadius:
+                      "50%",
                     background:
                       "rgba(0,168,132,0.08)",
                     display:
