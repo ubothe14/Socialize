@@ -253,7 +253,12 @@
 
 // export default CallPage;
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 import {
   useNavigate,
   useParams,
@@ -567,9 +572,8 @@ const CallPage = () => {
             );
           }
 
-          // IMPORTANT:
-          // This is the CHAT channel,
-          // not the Video call ID.
+          // Chat channel ID
+          // NOT the Video Call ID
           const channel =
             chatClient.channel(
               "messaging",
@@ -891,7 +895,14 @@ const CallContent = ({
     useNavigate();
 
   // =========================================================
-  // DEBUG PARTICIPANTS
+  // PREVIOUS PARTICIPANT COUNT
+  // =========================================================
+
+  const previousParticipantCount =
+    useRef(0);
+
+  // =========================================================
+  // PARTICIPANT TRACKING
   // =========================================================
 
   useEffect(() => {
@@ -909,7 +920,34 @@ const CallContent = ({
         );
       }
     );
-  }, [participants]);
+
+    // =======================================================
+    // SOMEONE LEFT THE ACTIVE CALL
+    // =======================================================
+
+    if (
+      previousParticipantCount.current >= 2 &&
+      participants.length < 2
+    ) {
+      console.log(
+        "📞 Other participant left the call"
+      );
+
+      toast.success(
+        "Call ended"
+      );
+
+      navigate("/");
+
+      return;
+    }
+
+    previousParticipantCount.current =
+      participants.length;
+  }, [
+    participants,
+    navigate,
+  ]);
 
   // =========================================================
   // DEBUG CALL STATE
@@ -1012,11 +1050,6 @@ const CallContent = ({
 
   // =========================================================
   // CALLER WAITING FOR RECEIVER
-  //
-  // IMPORTANT:
-  // CallContent stays mounted here.
-  // When receiver joins, useParticipants() updates
-  // from 1 -> 2 and this screen automatically disappears.
   // =========================================================
 
   if (
