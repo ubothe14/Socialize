@@ -344,7 +344,6 @@
 // };
 
 // export default WhatsAppLayout;
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { StreamChat } from "stream-chat";
@@ -436,6 +435,7 @@ const WhatsAppLayout = () => {
     enabled: !!authUser,
   });
 
+  // Number of pending incoming friend requests
   const notifCount =
     friendRequests?.incomingReqs?.length || 0;
 
@@ -679,10 +679,6 @@ const WhatsAppLayout = () => {
       console.log(
         "📞 STARTING VIDEO CALL"
       );
-
-      // -----------------------------------------------------
-      // GENERATE UNIQUE VIDEO CALL ID
-      // -----------------------------------------------------
 
       const callId =
         crypto.randomUUID();
@@ -1012,15 +1008,12 @@ const WhatsAppLayout = () => {
           callerName={
             incomingCall.callerName
           }
-
           callerPic={
             incomingCall.callerPic
           }
-
           onAccept={
             handleAcceptCall
           }
-
           onDecline={
             handleDeclineCall
           }
@@ -1036,15 +1029,10 @@ const WhatsAppLayout = () => {
         setActiveTab={
           handleTabChange
         }
-        notifCount={notifCount}
       />
 
       {/* =====================================================
           LEFT PANEL
-
-          IMPORTANT:
-          Gemini does not need the normal LeftPanel.
-          This prevents the large empty area.
           ===================================================== */}
 
       {activeTab !== "ai" && (
@@ -1075,6 +1063,9 @@ const WhatsAppLayout = () => {
             }
             chatClient={
               chatClient
+            }
+            notifCount={
+              notifCount
             }
           />
         </div>

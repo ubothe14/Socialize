@@ -153,6 +153,7 @@
 
 .wa-header-actions {
   display: flex;
+  align-items: center;
   gap: 4px;
 }
 
@@ -175,7 +176,41 @@
   color: var(--wa-text);
 }
 
-/* Search bar */
+/* ── Notification Badge Beside New Chat ─────── */
+
+.notification-header-btn {
+  position: relative;
+}
+
+.notification-header-badge {
+  position: absolute;
+  top: -2px;
+  right: -5px;
+
+  min-width: 17px;
+  height: 17px;
+
+  padding: 0 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--wa-green);
+  color: #fff;
+
+  border-radius: 10px;
+
+  border: 2px solid var(--wa-panel-header);
+
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+
+  pointer-events: none;
+}
+
+/* ── Search bar ────────────────────────────── */
 
 .wa-search-wrap {
   padding: 8px 12px;
@@ -206,7 +241,7 @@
   color: var(--wa-text-muted);
 }
 
-/* Scrollable content area */
+/* ── Scrollable content area ───────────────── */
 
 .wa-panel-content {
   flex: 1;
@@ -227,7 +262,7 @@
   border-radius: 2px;
 }
 
-/* Chat list item */
+/* ── Chat list item ────────────────────────── */
 
 .wa-chat-item {
   display: flex;
@@ -286,7 +321,7 @@
   white-space: nowrap;
 }
 
-/* Section label */
+/* ── Section label ─────────────────────────── */
 
 .wa-section-label {
   padding: 12px 16px 6px;
@@ -297,7 +332,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Discover / user card */
+/* ── Discover / user card ─────────────────── */
 
 .wa-user-row {
   display: flex;
@@ -344,7 +379,7 @@
   margin-top: 2px;
 }
 
-/* Buttons */
+/* ── Buttons ───────────────────────────────── */
 
 .wa-btn-primary {
   background: var(--wa-green);
@@ -403,7 +438,7 @@
   background: rgba(241, 92, 109, 0.1);
 }
 
-/* Notification request card */
+/* ── Notification request card ────────────── */
 
 .wa-notif-card {
   padding: 12px 16px;
@@ -415,7 +450,7 @@
   background: var(--wa-hover);
 }
 
-/* ── Right Panel ────────────────────────────── */
+/* ── Right Panel ───────────────────────────── */
 
 .wa-right-panel {
   flex: 1;
@@ -427,7 +462,7 @@
   overflow: hidden;
 }
 
-/* Gemini full-width right panel */
+/* ── Gemini full-width right panel ────────── */
 
 .ai-full-panel {
   flex: 1 1 auto !important;
@@ -435,7 +470,7 @@
   min-width: 0 !important;
 }
 
-/* WhatsApp dot pattern background */
+/* ── WhatsApp dot pattern background ──────── */
 
 .wa-chat-bg {
   flex: 1;
@@ -446,7 +481,7 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='1' fill='%23ffffff08'/%3E%3C/svg%3E");
 }
 
-/* Empty state */
+/* ── Empty state ───────────────────────────── */
 
 .wa-empty-state {
   flex: 1;
@@ -1012,7 +1047,7 @@
   object-fit: cover;
 }
 
-/* Modal builder for creating status */
+/* ── Modal builder for creating status ─────── */
 
 .status-builder-overlay {
   position: fixed;
