@@ -389,30 +389,14 @@ const WhatsAppLayout = () => {
   const { authUser } = useAuthUser();
 
   const [activeTab, setActiveTab] = useState("chats");
-
-  const [selectedFriend, setSelectedFriend] =
-    useState(null);
-
-  const [chatClient, setChatClient] =
-    useState(null);
-
-  const [channel, setChannel] =
-    useState(null);
-
-  const [chatLoading, setChatLoading] =
-    useState(false);
-
-  const [activeStatusGroup, setActiveStatusGroup] =
-    useState(null);
-
-  const [showSearchPanel, setShowSearchPanel] =
-    useState(false);
-
-  const [incomingCall, setIncomingCall] =
-    useState(null);
-
-  const [mobileChatOpen, setMobileChatOpen] =
-    useState(false);
+  const [selectedFriend, setSelectedFriend] = useState(null);
+  const [chatClient, setChatClient] = useState(null);
+  const [channel, setChannel] = useState(null);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [activeStatusGroup, setActiveStatusGroup] = useState(null);
+  const [showSearchPanel, setShowSearchPanel] = useState(false);
+  const [incomingCall, setIncomingCall] = useState(null);
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
 
   // =========================================================
   // STREAM TOKEN
@@ -435,7 +419,7 @@ const WhatsAppLayout = () => {
     enabled: !!authUser,
   });
 
-  // Number of pending incoming friend requests
+  // Notification count is shown beside New Chat
   const notifCount =
     friendRequests?.incomingReqs?.length || 0;
 
@@ -454,9 +438,7 @@ const WhatsAppLayout = () => {
       }
 
       try {
-        console.log(
-          "🔵 Initializing Stream Chat..."
-        );
+        console.log("🔵 Initializing Stream Chat...");
 
         const client =
           StreamChat.getInstance(
@@ -489,9 +471,7 @@ const WhatsAppLayout = () => {
           }
         );
 
-        console.log(
-          "✅ Stream Chat ready"
-        );
+        console.log("✅ Stream Chat ready");
       } catch (error) {
         console.error(
           "❌ Stream Chat initialization error:",
@@ -593,9 +573,7 @@ const WhatsAppLayout = () => {
       try {
         if (selectedFriend.cid) {
           await selectedFriend.watch();
-
           setChannel(selectedFriend);
-
           return;
         }
 
@@ -693,10 +671,6 @@ const WhatsAppLayout = () => {
         channel.id
       );
 
-      // -----------------------------------------------------
-      // CREATE STREAM VIDEO CLIENT
-      // -----------------------------------------------------
-
       videoClient =
         new StreamVideoClient({
           apiKey: STREAM_API_KEY,
@@ -714,10 +688,6 @@ const WhatsAppLayout = () => {
         "✅ Video client created"
       );
 
-      // -----------------------------------------------------
-      // CREATE STREAM VIDEO CALL
-      // -----------------------------------------------------
-
       const videoCall =
         videoClient.call(
           "default",
@@ -734,10 +704,6 @@ const WhatsAppLayout = () => {
       console.log(
         "✅ Video call created"
       );
-
-      // -----------------------------------------------------
-      // SEND CHAT INVITE
-      // -----------------------------------------------------
 
       await channel.sendMessage({
         text: "Incoming video call...",
@@ -766,23 +732,14 @@ const WhatsAppLayout = () => {
         "================================"
       );
 
-      // -----------------------------------------------------
-      // DISCONNECT TEMPORARY CLIENT
-      // -----------------------------------------------------
-
       await videoClient.disconnectUser();
 
       videoClient = null;
-
-      // -----------------------------------------------------
-      // NAVIGATE CALLER
-      // -----------------------------------------------------
 
       window.location.href =
         `/call/${callId}?calling=true&channelId=${encodeURIComponent(
           channel.id
         )}`;
-
     } catch (error) {
       console.error(
         "❌ VIDEO CALL ERROR:",
@@ -1092,7 +1049,6 @@ const WhatsAppLayout = () => {
           height: "100%",
         }}
       >
-
         <div
           style={{
             flex: 1,
@@ -1154,7 +1110,6 @@ const WhatsAppLayout = () => {
                       16,
                   }}
                 >
-
                   <svg
                     viewBox="0 0 24 24"
                     width="80"
@@ -1164,7 +1119,6 @@ const WhatsAppLayout = () => {
                   >
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
                   </svg>
-
                 </div>
 
                 <h2>
@@ -1178,7 +1132,6 @@ const WhatsAppLayout = () => {
                 </p>
 
               </div>
-
             )
 
           ) : selectedFriend &&
@@ -1197,11 +1150,9 @@ const WhatsAppLayout = () => {
               <Chat
                 client={chatClient}
               >
-
                 <Channel
                   channel={channel}
                 >
-
                   <Window hideOnThread>
 
                     <div
@@ -1243,11 +1194,9 @@ const WhatsAppLayout = () => {
                         }}
                         className="mobile-back-btn"
                       >
-
                         <ArrowLeftIcon
                           size={20}
                         />
-
                       </button>
 
                       <div
@@ -1255,7 +1204,6 @@ const WhatsAppLayout = () => {
                           flex: 1,
                         }}
                       >
-
                         <CustomChannelHeader
                           handleVideoCall={
                             handleVideoCall
@@ -1266,7 +1214,6 @@ const WhatsAppLayout = () => {
                             )
                           }
                         />
-
                       </div>
 
                     </div>
@@ -1282,7 +1229,6 @@ const WhatsAppLayout = () => {
                   <Thread />
 
                 </Channel>
-
               </Chat>
 
             ) : null
@@ -1313,13 +1259,11 @@ const WhatsAppLayout = () => {
                     16,
                 }}
               >
-
                 <MessageSquareIcon
                   size={80}
                   color="var(--wa-green)"
                   opacity={0.6}
                 />
-
               </div>
 
               <h2>
@@ -1347,7 +1291,6 @@ const WhatsAppLayout = () => {
                   gap: 6,
                 }}
               >
-
                 <span
                   style={{
                     width: 8,
@@ -1362,11 +1305,9 @@ const WhatsAppLayout = () => {
                 />
 
                 End-to-end encrypted
-
               </div>
 
             </div>
-
           )}
 
         </div>

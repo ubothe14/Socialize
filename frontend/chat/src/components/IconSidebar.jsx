@@ -10,12 +10,36 @@ import {
 import useAuthUser from "../hooks/useAuthUser";
 
 const tabs = [
-  { id: "chats", icon: MessageSquareIcon, label: "Chats" },
-  { id: "groups", icon: UsersIcon, label: "Groups" },
-  { id: "status", icon: RadioIcon, label: "Status" },
-  { id: "discover", icon: GlobeIcon, label: "Discover" },
-  { id: "ai", icon: BotIcon, label: "Gemini AI" },
-  { id: "notifications", icon: BellIcon, label: "Notifications" },
+  {
+    id: "chats",
+    icon: MessageSquareIcon,
+    label: "Chats",
+  },
+  {
+    id: "groups",
+    icon: UsersIcon,
+    label: "Groups",
+  },
+  {
+    id: "status",
+    icon: RadioIcon,
+    label: "Status",
+  },
+  {
+    id: "discover",
+    icon: GlobeIcon,
+    label: "Discover",
+  },
+  {
+    id: "ai",
+    icon: BotIcon,
+    label: "Gemini AI",
+  },
+  {
+    id: "notifications",
+    icon: BellIcon,
+    label: "Notifications",
+  },
 ];
 
 const IconSidebar = ({ activeTab, setActiveTab }) => {
