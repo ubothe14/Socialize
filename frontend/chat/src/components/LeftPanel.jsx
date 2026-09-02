@@ -17,6 +17,7 @@ const TAB_TITLES = {
   discover:      "Discover",
   notifications: "Notifications",
   settings:      "Settings",
+  ai:            "Gemini AI",
 };
 
 const LeftPanel = ({ activeTab, selectedFriend, setSelectedFriend, onSelectStatusGroup, chatClient }) => {

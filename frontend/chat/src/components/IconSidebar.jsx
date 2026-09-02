@@ -1,4 +1,4 @@
-import { MessageSquareIcon, UsersIcon, BellIcon, RadioIcon, SettingsIcon, GlobeIcon } from "lucide-react";
+import { MessageSquareIcon, UsersIcon, BellIcon, RadioIcon, SettingsIcon, GlobeIcon, BotIcon } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 
 const tabs = [
@@ -6,6 +6,7 @@ const tabs = [
   { id: "groups",        icon: UsersIcon,          label: "Groups" },
   { id: "status",        icon: RadioIcon,          label: "Status" },
   { id: "discover",      icon: GlobeIcon,          label: "Discover" },
+  { id: "ai",             icon: BotIcon,             label: "Gemini AI" },
   { id: "notifications", icon: BellIcon,           label: "Notifications" },
 ];
 

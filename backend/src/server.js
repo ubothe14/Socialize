@@ -154,7 +154,7 @@ import chatRoutes from "./routes/chat.route.js";
 import statusRoutes from "./routes/status.route.js";
 
 import { connectDB } from "./lib/db.js";
-
+import aiRoutes from "./routes/ai.route.js";
 const app = express();
 const PORT = process.env.PORT || 5001;
 
@@ -179,7 +179,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/status", statusRoutes);
-
+app.use("/api/ai", aiRoutes);
 // Backend health check
 app.get("/", (req, res) => {
   res.send("Socialize Backend is Running 🚀");

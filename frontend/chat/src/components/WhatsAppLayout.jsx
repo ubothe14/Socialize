@@ -20,6 +20,7 @@
 // import StatusPlayer from "./StatusPlayer";
 // import MessageSearchPanel from "./MessageSearchPanel";
 // import IncomingCallPopup from "./IncomingCallPopup";
+import AIChatPage from "../pages/AIChatPage.jsx";
 // import { MessageSquareIcon, ArrowLeftIcon } from "lucide-react";
 
 // const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
@@ -376,6 +377,7 @@ import ChatLoader from "./ChatLoader";
 import StatusPlayer from "./StatusPlayer";
 import MessageSearchPanel from "./MessageSearchPanel";
 import IncomingCallPopup from "./IncomingCallPopup";
+import AIChatPage from "../pages/AIChatPage.jsx";
 
 import {
   MessageSquareIcon,
@@ -926,6 +928,13 @@ const WhatsAppLayout = () => {
     (tab) => {
       setActiveTab(tab);
       setActiveStatusGroup(null);
+
+      // On mobile, open Gemini in the main panel immediately.
+      if (tab === "ai") {
+        setMobileChatOpen(true);
+      } else {
+        setMobileChatOpen(false);
+      }
     };
 
   // =========================================================
@@ -1091,10 +1100,12 @@ const WhatsAppLayout = () => {
         >
 
           {/* =================================================
-              STATUS
+              GEMINI AI
               ================================================= */}
 
-          {activeTab === "status" ? (
+          {activeTab === "ai" ? (
+            <AIChatPage />
+          ) : activeTab === "status" ? (
 
             activeStatusGroup ? (
 

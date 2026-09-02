@@ -82,4 +82,9 @@ export async function getStatuses() {
 export async function viewStatus(statusId) {
   const response = await axiosInstance.put(`/status/${statusId}/view`);
   return response.data;
-}
+}
+
+export async function askGemini(data) {
+  const response = await axiosInstance.post("/ai/ask", data);
+  return response.data;
+}
