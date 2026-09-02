@@ -345,7 +345,6 @@
 
 // export default WhatsAppLayout;
 
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { StreamChat } from "stream-chat";
@@ -390,8 +389,7 @@ const STREAM_API_KEY =
 const WhatsAppLayout = () => {
   const { authUser } = useAuthUser();
 
-  const [activeTab, setActiveTab] =
-    useState("chats");
+  const [activeTab, setActiveTab] = useState("chats");
 
   const [selectedFriend, setSelectedFriend] =
     useState(null);
@@ -721,7 +719,7 @@ const WhatsAppLayout = () => {
       );
 
       // -----------------------------------------------------
-      // CREATE VIDEO CALL BEFORE INVITING USER
+      // CREATE STREAM VIDEO CALL
       // -----------------------------------------------------
 
       const videoCall =
@@ -748,13 +746,14 @@ const WhatsAppLayout = () => {
       await channel.sendMessage({
         text: "Incoming video call...",
 
-        customType: "call_invite",
+        customType:
+          "call_invite",
 
-        // Video call ID
-        callId: callId,
+        callId:
+          callId,
 
-        // Chat channel ID
-        channelId: channel.id,
+        channelId:
+          channel.id,
 
         callerName:
           authUser.fullName,
@@ -838,10 +837,8 @@ const WhatsAppLayout = () => {
       channelId
     );
 
-    // Remove popup immediately
     setIncomingCall(null);
 
-    // Join existing Stream Video call
     window.location.href =
       `/call/${callId}?channelId=${encodeURIComponent(
         channelId
@@ -889,7 +886,8 @@ const WhatsAppLayout = () => {
           callId:
             incomingCall.callId,
 
-          channelId: channelId,
+          channelId:
+            channelId,
         });
 
         console.log(
@@ -927,9 +925,11 @@ const WhatsAppLayout = () => {
   const handleTabChange =
     (tab) => {
       setActiveTab(tab);
+
       setActiveStatusGroup(null);
 
-      // On mobile, open Gemini in the main panel immediately.
+      setShowSearchPanel(false);
+
       if (tab === "ai") {
         setMobileChatOpen(true);
       } else {
@@ -1041,36 +1041,44 @@ const WhatsAppLayout = () => {
 
       {/* =====================================================
           LEFT PANEL
+
+          IMPORTANT:
+          Gemini does not need the normal LeftPanel.
+          This prevents the large empty area.
           ===================================================== */}
 
-      <div
-        className={`wa-left-panel ${
-          mobileChatOpen
-            ? "mobile-hidden"
-            : ""
-        }`}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <LeftPanel
-          activeTab={activeTab}
-          setActiveTab={
-            handleTabChange
-          }
-          selectedFriend={
-            selectedFriend
-          }
-          setSelectedFriend={
-            handleSelectFriend
-          }
-          onSelectStatusGroup={
-            setActiveStatusGroup
-          }
-          chatClient={chatClient}
-        />
-      </div>
+      {activeTab !== "ai" && (
+        <div
+          className={`wa-left-panel ${
+            mobileChatOpen
+              ? "mobile-hidden"
+              : ""
+          }`}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <LeftPanel
+            activeTab={activeTab}
+            setActiveTab={
+              handleTabChange
+            }
+            selectedFriend={
+              selectedFriend
+            }
+            setSelectedFriend={
+              handleSelectFriend
+            }
+            onSelectStatusGroup={
+              setActiveStatusGroup
+            }
+            chatClient={
+              chatClient
+            }
+          />
+        </div>
+      )}
 
       {/* =====================================================
           RIGHT PANEL
@@ -1081,6 +1089,10 @@ const WhatsAppLayout = () => {
           mobileChatOpen
             ? "mobile-open"
             : ""
+        } ${
+          activeTab === "ai"
+            ? "ai-full-panel"
+            : ""
         }`}
         style={{
           display: "flex",
@@ -1089,6 +1101,7 @@ const WhatsAppLayout = () => {
           height: "100%",
         }}
       >
+
         <div
           style={{
             flex: 1,
@@ -1104,8 +1117,14 @@ const WhatsAppLayout = () => {
               ================================================= */}
 
           {activeTab === "ai" ? (
+
             <AIChatPage />
+
           ) : activeTab === "status" ? (
+
+            /* =================================================
+               STATUS
+               ================================================= */
 
             activeStatusGroup ? (
 
@@ -1134,14 +1153,17 @@ const WhatsAppLayout = () => {
                     borderRadius: "50%",
                     background:
                       "rgba(0,168,132,0.08)",
-                    display: "flex",
+                    display:
+                      "flex",
                     alignItems:
                       "center",
                     justifyContent:
                       "center",
-                    marginBottom: 16,
+                    marginBottom:
+                      16,
                   }}
                 >
+
                   <svg
                     viewBox="0 0 24 24"
                     width="80"
@@ -1151,6 +1173,7 @@ const WhatsAppLayout = () => {
                   >
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
                   </svg>
+
                 </div>
 
                 <h2>
@@ -1164,6 +1187,7 @@ const WhatsAppLayout = () => {
                 </p>
 
               </div>
+
             )
 
           ) : selectedFriend &&
@@ -1191,10 +1215,12 @@ const WhatsAppLayout = () => {
 
                     <div
                       style={{
-                        display: "flex",
+                        display:
+                          "flex",
                         alignItems:
                           "center",
-                        width: "100%",
+                        width:
+                          "100%",
                         background:
                           "var(--wa-panel-header)",
                         borderBottom:
@@ -1209,13 +1235,16 @@ const WhatsAppLayout = () => {
                         style={{
                           background:
                             "none",
-                          border: "none",
+                          border:
+                            "none",
                           cursor:
                             "pointer",
                           color:
                             "var(--wa-text-muted)",
-                          marginRight: 8,
-                          padding: 4,
+                          marginRight:
+                            8,
+                          padding:
+                            4,
                           borderRadius:
                             "50%",
                           display:
@@ -1223,9 +1252,11 @@ const WhatsAppLayout = () => {
                         }}
                         className="mobile-back-btn"
                       >
+
                         <ArrowLeftIcon
                           size={20}
                         />
+
                       </button>
 
                       <div
@@ -1233,6 +1264,7 @@ const WhatsAppLayout = () => {
                           flex: 1,
                         }}
                       >
+
                         <CustomChannelHeader
                           handleVideoCall={
                             handleVideoCall
@@ -1243,6 +1275,7 @@ const WhatsAppLayout = () => {
                             )
                           }
                         />
+
                       </div>
 
                     </div>
@@ -1266,7 +1299,7 @@ const WhatsAppLayout = () => {
           ) : (
 
             /* =================================================
-               EMPTY STATE
+               EMPTY CHAT STATE
                ================================================= */
 
             <div className="wa-empty-state">
@@ -1275,22 +1308,27 @@ const WhatsAppLayout = () => {
                 style={{
                   width: 200,
                   height: 200,
-                  borderRadius: "50%",
+                  borderRadius:
+                    "50%",
                   background:
                     "rgba(0,168,132,0.08)",
-                  display: "flex",
+                  display:
+                    "flex",
                   alignItems:
                     "center",
                   justifyContent:
                     "center",
-                  marginBottom: 16,
+                  marginBottom:
+                    16,
                 }}
               >
+
                 <MessageSquareIcon
                   size={80}
                   color="var(--wa-green)"
                   opacity={0.6}
                 />
+
               </div>
 
               <h2>
@@ -1311,17 +1349,20 @@ const WhatsAppLayout = () => {
                   color:
                     "var(--wa-text-dim)",
                   marginTop: 8,
-                  display: "flex",
+                  display:
+                    "flex",
                   alignItems:
                     "center",
                   gap: 6,
                 }}
               >
+
                 <span
                   style={{
                     width: 8,
                     height: 8,
-                    borderRadius: "50%",
+                    borderRadius:
+                      "50%",
                     background:
                       "var(--wa-green)",
                     display:
@@ -1330,9 +1371,11 @@ const WhatsAppLayout = () => {
                 />
 
                 End-to-end encrypted
+
               </div>
 
             </div>
+
           )}
 
         </div>
@@ -1346,7 +1389,9 @@ const WhatsAppLayout = () => {
             <MessageSearchPanel
               channel={channel}
               onClose={() =>
-                setShowSearchPanel(false)
+                setShowSearchPanel(
+                  false
+                )
               }
               onSelectMessage={
                 handleSelectMessage
