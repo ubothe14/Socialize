@@ -253,7 +253,6 @@
 
 // export default CallPage;
 
-
 import { useEffect, useState } from "react";
 import {
   useNavigate,
@@ -267,8 +266,6 @@ import { useQuery } from "@tanstack/react-query";
 import { getStreamToken } from "../lib/api";
 
 import { StreamChat } from "stream-chat";
-
-import { PhoneOffIcon } from "lucide-react";
 
 import {
   StreamVideo,
@@ -297,7 +294,7 @@ const CallPage = () => {
   const isCallingMode =
     searchParams.get("calling") === "true";
 
-  // Chat channel ID
+  // Stream Chat channel ID
   const chatChannelId =
     searchParams.get("channelId");
 
@@ -309,9 +306,6 @@ const CallPage = () => {
 
   const [callRejected, setCallRejected] =
     useState(false);
-
-  const [participantsCount, setParticipantsCount] =
-    useState(1);
 
   const [errorMessage, setErrorMessage] =
     useState("");
@@ -341,11 +335,7 @@ const CallPage = () => {
   // =========================================================
 
   useEffect(() => {
-    if (
-      !isCallingMode ||
-      callRejected ||
-      participantsCount > 1
-    ) {
+    if (!isCallingMode || callRejected) {
       return;
     }
 
@@ -368,7 +358,6 @@ const CallPage = () => {
   }, [
     isCallingMode,
     callRejected,
-    participantsCount,
   ]);
 
   // =========================================================
@@ -567,7 +556,6 @@ const CallPage = () => {
               STREAM_API_KEY
             );
 
-          // Connect only if not already connected
           if (!chatClient.userID) {
             await chatClient.connectUser(
               user,
@@ -580,8 +568,8 @@ const CallPage = () => {
           }
 
           // IMPORTANT:
-          // chatChannelId is the Stream Chat channel ID,
-          // NOT the Stream Video call ID.
+          // This is the CHAT channel,
+          // not the Video call ID.
           const channel =
             chatClient.channel(
               "messaging",
@@ -630,10 +618,6 @@ const CallPage = () => {
           console.log(
             "✅ Rejection listener added"
           );
-        } else {
-          console.log(
-            "ℹ️ No chat channel ID supplied"
-          );
         }
 
         console.log(
@@ -657,9 +641,7 @@ const CallPage = () => {
           "❌ VIDEO CALL INITIALIZATION FAILED"
         );
 
-        console.error(
-          error
-        );
+        console.error(error);
 
         console.error(
           "===================================="
@@ -849,12 +831,197 @@ const CallPage = () => {
   }
 
   // =========================================================
-  // CALLER WAITING SCREEN
+  // VIDEO CALL
+  // =========================================================
+
+  return (
+    <div
+      className="h-screen w-screen bg-[#0a1014]"
+      style={{
+        overflow: "hidden",
+      }}
+    >
+      {client && call ? (
+        <StreamVideo client={client}>
+          <StreamTheme>
+            <StreamCall call={call}>
+              <CallContent
+                isCallingMode={
+                  isCallingMode
+                }
+                onCancelCall={
+                  handleCancelCall
+                }
+              />
+            </StreamCall>
+          </StreamTheme>
+        </StreamVideo>
+      ) : (
+        <div className="flex items-center justify-center w-full h-full text-white">
+          <p>
+            Could not initialize
+            video call.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ===========================================================
+// CALL CONTENT
+// ===========================================================
+
+const CallContent = ({
+  isCallingMode,
+  onCancelCall,
+}) => {
+  const {
+    useCallCallingState,
+    useParticipants,
+  } = useCallStateHooks();
+
+  const callingState =
+    useCallCallingState();
+
+  const participants =
+    useParticipants();
+
+  const navigate =
+    useNavigate();
+
+  // =========================================================
+  // DEBUG PARTICIPANTS
+  // =========================================================
+
+  useEffect(() => {
+    console.log(
+      "👥 Participants:",
+      participants.length
+    );
+
+    participants.forEach(
+      (participant, index) => {
+        console.log(
+          `Participant ${index + 1}:`,
+          participant.user?.name ||
+            participant.user?.id
+        );
+      }
+    );
+  }, [participants]);
+
+  // =========================================================
+  // DEBUG CALL STATE
+  // =========================================================
+
+  useEffect(() => {
+    console.log(
+      "📹 Calling State:",
+      callingState
+    );
+  }, [callingState]);
+
+  // =========================================================
+  // CALL LEFT
+  // =========================================================
+
+  useEffect(() => {
+    if (
+      callingState ===
+      CallingState.LEFT
+    ) {
+      console.log(
+        "📞 Call ended"
+      );
+
+      navigate("/");
+    }
+  }, [
+    callingState,
+    navigate,
+  ]);
+
+  // =========================================================
+  // JOINING
+  // =========================================================
+
+  if (
+    callingState ===
+      CallingState.JOINING ||
+    callingState ===
+      CallingState.RECONNECTING
+  ) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-[#0a1014] text-white">
+        <div className="text-center">
+          <div
+            style={{
+              fontSize: 22,
+              marginBottom: 8,
+            }}
+          >
+            Connecting to video call...
+          </div>
+
+          <p
+            style={{
+              color: "#8696a0",
+              fontSize: 14,
+            }}
+          >
+            Please wait
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================
+  // NOT JOINED
+  // =========================================================
+
+  if (
+    callingState !==
+    CallingState.JOINED
+  ) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-[#0a1014] text-white">
+        <div className="text-center">
+          <p
+            style={{
+              fontSize: 20,
+              marginBottom: 8,
+            }}
+          >
+            Preparing video call...
+          </p>
+
+          <p
+            style={{
+              color: "#8696a0",
+              fontSize: 14,
+            }}
+          >
+            Call status: {callingState}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================
+  // CALLER WAITING FOR RECEIVER
+  //
+  // IMPORTANT:
+  // CallContent stays mounted here.
+  // When receiver joins, useParticipants() updates
+  // from 1 -> 2 and this screen automatically disappears.
   // =========================================================
 
   if (
     isCallingMode &&
-    participantsCount === 1
+    participants.length === 1
   ) {
     return (
       <div className="h-screen w-screen bg-[#0a1014] flex flex-col items-center justify-center font-sans">
@@ -916,17 +1083,17 @@ const CallPage = () => {
               fontSize: 14,
               color:
                 "var(--wa-text-muted)",
-              margin: "0 0 48px",
+              margin: "0 0 30px",
             }}
           >
-            Waiting for recipient
-            to accept the call
+            Waiting for recipient to
+            accept the call
           </p>
 
+          {/* Cancel */}
+
           <button
-            onClick={
-              handleCancelCall
-            }
+            onClick={onCancelCall}
             style={{
               width: 60,
               height: 60,
@@ -943,7 +1110,13 @@ const CallPage = () => {
             className="call-btn-hover"
             title="Cancel Call"
           >
-            <PhoneOffIcon size={24} />
+            <span
+              style={{
+                fontSize: 25,
+              }}
+            >
+              ☎
+            </span>
           </button>
         </div>
       </div>
@@ -951,183 +1124,7 @@ const CallPage = () => {
   }
 
   // =========================================================
-  // VIDEO CALL
-  // =========================================================
-
-  return (
-    <div
-      className="h-screen w-screen bg-[#0a1014]"
-      style={{
-        overflow: "hidden",
-      }}
-    >
-      {client && call ? (
-        <StreamVideo client={client}>
-          <StreamTheme>
-            <StreamCall call={call}>
-              <CallContent
-                setParticipantsCount={
-                  setParticipantsCount
-                }
-              />
-            </StreamCall>
-          </StreamTheme>
-        </StreamVideo>
-      ) : (
-        <div className="flex items-center justify-center w-full h-full text-white">
-          <p>
-            Could not initialize
-            video call.
-          </p>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ===========================================================
-// CALL CONTENT
-// ===========================================================
-
-const CallContent = ({
-  setParticipantsCount,
-}) => {
-  const {
-    useCallCallingState,
-    useParticipants,
-  } = useCallStateHooks();
-
-  const callingState =
-    useCallCallingState();
-
-  // IMPORTANT:
-  // useParticipants() is the correct Stream hook.
-  const participants =
-    useParticipants();
-
-  const navigate =
-    useNavigate();
-
-  // =========================================================
-  // PARTICIPANT COUNT
-  // =========================================================
-
-  useEffect(() => {
-    console.log(
-      "👥 Participants:",
-      participants.length
-    );
-
-    setParticipantsCount(
-      participants.length
-    );
-  }, [
-    participants,
-    setParticipantsCount,
-  ]);
-
-  // =========================================================
-  // CALL LEFT
-  // =========================================================
-
-  useEffect(() => {
-    if (
-      callingState ===
-      CallingState.LEFT
-    ) {
-      console.log(
-        "📞 Call ended"
-      );
-
-      navigate("/");
-    }
-  }, [
-    callingState,
-    navigate,
-  ]);
-
-  // =========================================================
-  // DEBUG CALL STATE
-  // =========================================================
-
-  useEffect(() => {
-    console.log(
-      "📹 Calling State:",
-      callingState
-    );
-  }, [callingState]);
-
-  // =========================================================
-  // JOINING
-  // =========================================================
-
-  if (
-    callingState ===
-      CallingState.JOINING ||
-    callingState ===
-      CallingState.RECONNECTING
-  ) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-[#0a1014] text-white">
-        <div className="text-center">
-          <div
-            style={{
-              fontSize: 22,
-              marginBottom: 8,
-            }}
-          >
-            Connecting to video
-            call...
-          </div>
-
-          <p
-            style={{
-              color: "#8696a0",
-              fontSize: 14,
-            }}
-          >
-            Please wait
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // =========================================================
-  // NOT JOINED
-  // =========================================================
-
-  if (
-    callingState !==
-    CallingState.JOINED
-  ) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-[#0a1014] text-white">
-        <div className="text-center">
-          <p
-            style={{
-              fontSize: 20,
-              marginBottom: 8,
-            }}
-          >
-            Preparing video call...
-          </p>
-
-          <p
-            style={{
-              color: "#8696a0",
-              fontSize: 14,
-            }}
-          >
-            Call status: {callingState}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // =========================================================
-  // ACTIVE CALL
+  // ACTIVE VIDEO CALL
   // =========================================================
 
   return (
